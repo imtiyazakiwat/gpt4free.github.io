@@ -206,8 +206,6 @@
             const connect_status = document.getElementById("connect_status");
             const check_urls = [
                 "https://g4f.hopto.org",
-                "https://localhost:8080",
-                "https://localhost:1337",
             ];
             const valid_urls = []
             async function check_url(url) {
@@ -227,12 +225,6 @@
             check_urls.forEach(async (url) => {
                 await check_url(url);
             });
-            for (let i = 2; valid_urls.length < 2 && i < 178; i++) {
-                let url = `http://192.168.178.${i}:8080`;
-                await check_url(url);
-                url = `http://192.168.178.${i}:1337`;
-                await check_url(url);
-            }
 
             const isIframe = window.self !== window.top;
             const button = document.querySelector('form a.button');
