@@ -1174,6 +1174,7 @@ ul {
 .sidebar-container {
     display: flex;
     padding: 15px;
+    flex-direction: column;
 }
 
 /* style for hljs copy */
@@ -1580,7 +1581,6 @@ form textarea {
 @media only screen and (min-width: 40em) {
     .sidebar {
         width: 300px;
-        padding: 15px;
         margin-right: 10px;
     }
 }
