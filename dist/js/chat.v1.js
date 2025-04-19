@@ -97,7 +97,7 @@ if (window.markdownit) {
             .replaceAll('&quot;&gt;&lt;/audio&gt;', '"></audio>')
             .replaceAll('&lt;iframe type=&quot;text/html&quot; src=&quot;', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
             .replaceAll('&quot;&gt;&lt;/iframe&gt;', `?enablejsapi=1"></iframe>`)
-            .replaceAll('src="/', `src="${window.backend_url}/`)
+            .replaceAll('src="/', `src="${window.backendUrl}/`)
     }
 }
 
@@ -524,11 +524,11 @@ const handle_ask = async (do_ask_gpt = true, message = null) => {
         let formData = new FormData();
         formData.append('files', file); // Append as a file
         const bucket_id = generateUUID();
-        await fetch(`${window.backend_url}/backend-api/v2/files/${bucket_id}`, {
+        await fetch(`${window.backendUrl}/backend-api/v2/files/${bucket_id}`, {
             method: 'POST',
             body: formData
         });
-        connectToSSE(`${window.backend_url}/backend-api/v2/files/${bucket_id}`, false, bucket_id); //Retrieve and refine
+        connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}`, false, bucket_id); //Retrieve and refine
         return;
     }
 
@@ -1327,7 +1327,7 @@ const delete_conversation = async (conversation_id) => {
         if (Array.isArray(message.content)) {
             for (const item of message.content) {
                 if ("bucket_id" in item) {
-                    const delete_url = `${window.backend_url}/backend-api/v2/files/${encodeURI(item.bucket_id)}`;
+                    const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURI(item.bucket_id)}`;
                     await fetch(delete_url, {
                         method: 'DELETE'
                     });
@@ -1336,7 +1336,7 @@ const delete_conversation = async (conversation_id) => {
         }
     }
     if (conversation.share) {
-        const url = `${window.backend_url}/backend-api/v2/files/${conversation.id}`;
+        const url = `${window.backendUrl}/backend-api/v2/files/${conversation.id}`;
         await fetch(url, {
             method: 'DELETE'
         });
@@ -1376,7 +1376,7 @@ const new_conversation = async (private = false) => {
     }
     window.conversation_id = private ? null : generateUUID();
     document.title = window.title || document.title;
-    document.querySelector(".chat-top-panel .convo-title").innerText = `${private ? "Private" : "New"} Conversation`;
+    document.querySelector(".chat-top-panel .convo-title").innerText = private ? translate("Private Conversation") : translate("New Conversation");
 
     await clear_conversation();
     if (chatPrompt) {
@@ -1493,7 +1493,7 @@ const load_conversation = async (conversation, scroll=true) => {
             synthesize_provider = item.synthesize.provider;
         }
         synthesize_params = (new URLSearchParams(synthesize_params)).toString();
-        let synthesize_url = `${window.backend_url}/backend-api/v2/synthesize/${synthesize_provider}?${synthesize_params}`;
+        let synthesize_url = `${window.backendUrl}/backend-api/v2/synthesize/${synthesize_provider}?${synthesize_params}`;
 
         const file = new File([buffer], 'message.md', {type: 'text/plain'});
         const objectUrl = URL.createObjectURL(file);
@@ -1736,7 +1736,7 @@ const remove_message = async (conversation_id, index) => {
     const data = get_conversation_data(conversation);
     await save_conversation(conversation_id, data);
     if (conversation.share) {
-        const url = `${window.backend_url}/backend-api/v2/chat/${conversation.id}`;
+        const url = `${window.backendUrl}/backend-api/v2/chat/${conversation.id}`;
         await fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
@@ -1746,7 +1746,7 @@ const remove_message = async (conversation_id, index) => {
     if (Array.isArray(old_message.content)) {
         for (const item of old_message.content) {
             if ("bucket_id" in item) {
-                const delete_url = `${window.backend_url}/backend-api/v2/files/${encodeURI(item.bucket_id)}`;
+                const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURI(item.bucket_id)}`;
                 await fetch(delete_url, {
                     method: 'DELETE'
                 });
@@ -1823,7 +1823,7 @@ const add_message = async (
     data = get_conversation_data(conversation);
     await save_conversation(conversation_id, data);
     if (conversation.share) {
-        const url = `${window.backend_url}/backend-api/v2/chat/${conversation.id}`;
+        const url = `${window.backendUrl}/backend-api/v2/chat/${conversation.id}`;
         fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
@@ -2189,7 +2189,7 @@ window.addEventListener('load', async function() {
     if (conversation && !conversation.share) {
         return await load_conversation(conversation);
     }
-    const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.conversation_id}`, {
+    const response = await fetch(`${window.backendUrl}/backend-api/v2/chat/${window.conversation_id}`, {
         headers: {'accept': 'application/json'},
     });
     if (!response.ok) {
@@ -2213,10 +2213,10 @@ setInterval(async () => {
         return;
     }
     const conversation = await get_conversation(window.conversation_id);
-    if (!conversation.share) {
+    if (!conversation || !conversation.share) {
         return
     }
-    const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${conversation.id}`, {
+    const response = await fetch(`${window.backendUrl}/backend-api/v2/chat/${conversation.id}`, {
         headers: {
             'accept': 'application/json',
             'if-none-match': conversation.updated,
@@ -2435,7 +2435,7 @@ async function on_api() {
         providersContainer.classList.add("field", "collapsible");
         providersContainer.innerHTML = `
             <div class="collapsible-header">
-                <span class="label">Providers (Enable/Disable)</span>
+                <span class="label">${translate('Providers (Enable/Disable)')}</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="collapsible-content hidden"></div>
@@ -2474,7 +2474,7 @@ async function on_api() {
     providersListContainer.classList.add("field", "collapsible");
     providersListContainer.innerHTML = `
         <div class="collapsible-header">
-            <span class="label">Providers API key</span>
+            <span class="label">${translate('Providers API key')}</span>
             <i class="fa-solid fa-chevron-down"></i>
         </div>
         <div class="collapsible-content api-key hidden"></div>
@@ -2658,7 +2658,7 @@ async function upload_cookies() {
     const file = fileInput.files[0];
     const formData = new FormData();
     formData.append('file', file);
-    response = await fetch(window.backend_url + "/backend-api/v2/upload_cookies", {
+    response = await fetch(window.backendUrl + "/backend-api/v2/upload_cookies", {
         method: 'POST',
         body: formData,
     });
@@ -2688,7 +2688,7 @@ function connectToSSE(url, do_refine, bucket_id) {
             fileInput.value = "";
         } else if (data.action == "media") {
             inputCount.innerText = `File: ${data.filename}`;
-            const url = `${window.backend_url}/files/${bucket_id}/media/${data.filename}`;
+            const url = `${window.backendUrl}/files/${bucket_id}/media/${data.filename}`;
             const media = [{bucket_id: bucket_id, url: url, name: data.filename}];
             await handle_ask(false, media);
         } else if (data.action == "load") {
@@ -2699,7 +2699,7 @@ function connectToSSE(url, do_refine, bucket_id) {
             inputCount.innerText = `Download: ${data.count} files`;
         } else if (data.action == "done") {
             if (do_refine) {
-                connectToSSE(`${window.backend_url}/backend-api/v2/files/${bucket_id}?refine_chunks_with_spacy=true`, false, bucket_id);
+                connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}?refine_chunks_with_spacy=true`, false, bucket_id);
                 return;
             }
             fileInput.value = "";
@@ -2711,7 +2711,7 @@ function connectToSSE(url, do_refine, bucket_id) {
             appStorage.setItem(`bucket:${bucket_id}`, data.size);
             inputCount.innerText = "Files are loaded successfully";
 
-            const url = `${window.backend_url}/backend-api/v2/files/${bucket_id}`;
+            const url = `${window.backendUrl}/backend-api/v2/files/${bucket_id}`;
             const media = [{bucket_id: bucket_id, url: url}];
             await handle_ask(false, media);
         }
@@ -2730,7 +2730,7 @@ async function upload_files(fileInput) {
     Array.from(fileInput.files).forEach(file => {
         formData.append('files', file);
     });
-    const response = await fetch(window.backend_url + "/backend-api/v2/files/" + bucket_id, {
+    const response = await fetch(window.backendUrl + "/backend-api/v2/files/" + bucket_id, {
         method: 'POST',
         body: formData
     });
@@ -2739,7 +2739,7 @@ async function upload_files(fileInput) {
     inputCount.innerText = `${count} File(s) uploaded successfully`;
     if (result.files.length > 0) {
         let do_refine = document.getElementById("refine")?.checked;
-        connectToSSE(`${window.backend_url}/backend-api/v2/files/${bucket_id}`, do_refine, bucket_id);
+        connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}`, do_refine, bucket_id);
     } else {
         paperclip.classList.remove("blink");
         fileInput.value = "";
@@ -2747,7 +2747,7 @@ async function upload_files(fileInput) {
     if (result.media) {
         const media = [];
         result.media.forEach((filename)=> {
-            const url = `${window.backend_url}/files/${bucket_id}/media/${filename}`;
+            const url = `${window.backendUrl}/files/${bucket_id}/media/${filename}`;
             media.push({bucket_id: bucket_id, name: filename, url: url});
         });
         await handle_ask(false, media);
@@ -2848,7 +2848,7 @@ async function api(ressource, args=null, files=null, message_id=null, scroll=tru
     if (user) {
         headers.x_user = user;
     }
-    let url = `${window.backend_url}/backend-api/v2/${ressource}`;
+    let url = `${window.backendUrl}/backend-api/v2/${ressource}`;
     let response;
     if (ressource == "models" && args) {
         api_key = get_api_key_by_provider(args);
@@ -2863,7 +2863,7 @@ async function api(ressource, args=null, files=null, message_id=null, scroll=tru
         if (ignored) {
             headers.x_ignored = ignored.join(" ");
         }
-        url = `${window.backend_url}/backend-api/v2/${ressource}/${args}`;
+        url = `${window.backendUrl}/backend-api/v2/${ressource}/${args}`;
     } else if (ressource == "conversation") {
         let body = JSON.stringify(args);
         headers.accept = 'text/event-stream';
@@ -3118,7 +3118,7 @@ function import_memory() {
             return;
         }
         let body = JSON.stringify(conversations[i]);
-        response = await fetch(`${window.backend_url}/backend-api/v2/memory/${user_id}`, {
+        response = await fetch(`${window.backendUrl}/backend-api/v2/memory/${user_id}`, {
             method: 'POST',
             body: body,
             headers: {

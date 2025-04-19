@@ -9,16 +9,16 @@
     <meta property="og:image" content="https://openai.com/content/images/2022/11/ChatGPT.jpg">
     <meta property="og:description" content="A conversational AI system that listens, learns, and challenges">
     <meta property="og:url" content="https://g4f.ai">
-    <link rel="stylesheet" href="/dist/css/style.css">
-    <link rel="stylesheet" href="/dist/css/all.min.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="/dist/img/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/dist/img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/dist/img/favicon-16x16.png">
-    <link rel="manifest" href="/dist/img/site.webmanifest">
-    <script src="/dist/js/highlightjs-copy.min.js"></script>
-    <script src="/dist/js/chat.v1.js" defer></script>
+    <link rel="stylesheet" href="../dist/css/style.css">
+    <link rel="stylesheet" href="../dist/css/all.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="../dist/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../dist/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../dist/img/favicon-16x16.png">
+    <link rel="manifest" href="../dist/img/site.webmanifest">
+    <script src="../dist/js/highlightjs-copy.min.js"></script>
+    <script src="../dist/js/chat.v1.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
-    <link rel="stylesheet" href="/dist/css/dracula.min.css">
+    <link rel="stylesheet" href="../dist/css/dracula.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe/dist/photoswipe.css">
     <script>
         MathJax = {
@@ -49,23 +49,20 @@
         <script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer/dist/cl100k_base.js" async></script>
         <script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer/dist/o200k_base.js" async></script>
     </template>
+    <script src="../dist/js/config.js" async></script>
+    <script src="../dist/js/translate.js" async></script>
+    <script src="../dist/js/highlight.min.js" async></script>
+    <script type="module" src="../dist/js/photoswipe.js" async></script>
     <script async>
         if (localStorage.getItem("countTokens") != "false") {
             const template = document.head.querySelector('template');
             document.head.appendChild(template.content);
+            template.remove();
         }
     </script>
-    <script type="module" src="/dist/js/photoswipe.js" async></script>
     <script>
-        const user_image = '<img src="/dist/img/user.png" alt="your avatar">';
-        const gpt_image = '<img src="/dist/img/gpt.png" alt="your avatar">';
-    </script>
-    <script src="/dist/js/highlight.min.js" async></script>
-    <script>
-        window.backend_url = localStorage.getItem('backend_url');
-        if (!window.backend_url) {
-            window.location.href = "/";
-        }
+        const user_image = '<img src="../dist/img/user.png" alt="your avatar">';
+        const gpt_image = '<img src="../dist/img/gpt.png" alt="your avatar">';
         window.conversation_id = "";
     </script>
     <title>G4F Chat</title>
@@ -78,7 +75,7 @@
         <div class="sidebar shown">
             <div class="sidebar-container">
                 <div class="sidebar-header">
-                    <div class="sidebar-logo">G4F Chat</div>
+                    <div class="sidebar-logo" data-translate="true">G4F Chat</div>
                     <div class="mobile-sidebar-toggle">
                         <i class="fa-solid fa-bars"></i>
                     </div>

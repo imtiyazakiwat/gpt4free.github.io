@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Scanner and QR Code Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <script src="dist/js/config.js" async></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
         video { width: 400px; height: 400px; border: 1px solid black; display: block; margin: auto; object-fit: cover; max-width: 100%;}
@@ -31,7 +32,6 @@
     <button id="generateQRCode">Generate QR Code</button>
 
     <script type="module">
-        const backend_url = localStorage.getItem('backend_url');
         const conversation_id = window.location.hash.replace("#", "");
         if (!conversation_id) {
             document.getElementById('generateQRCode')
@@ -67,7 +67,7 @@
         document.getElementById('generateQRCode').addEventListener('click', async () => {
             if (share_id) {
                 localStorage.getItem(`conversation:${share_id}`);
-                const delete_url = `${backend_url}/backend-api/v2/files/${encodeURI(share_id)}`;
+                const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURI(share_id)}`;
                 await fetch(delete_url, {
                     method: 'DELETE'
                 });
@@ -80,7 +80,7 @@
                 conversation.updated = Date.now();
                 localStorage.setItem(`conversation:${share_id}`, JSON.stringify(conversation));
             }
-            const url = `${backend_url}/backend-api/v2/chat/${encodeURI(conversation.id)}`;
+            const url = `${window.backendUrl}/backend-api/v2/chat/${encodeURI(conversation.id)}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {'content-type': 'application/json'},
@@ -135,7 +135,7 @@
                 qrScanner = new QrScanner(videoElem, result => {
                     camStatus.innerText = 'Camera Success: ' + result.data;
                     console.log('decoded QR code:', result);
-                    if (result.data.startsWith(backend_url)) {
+                    if (result.data.startsWith(window.backendUrl)) {
                         window.parent.location = result.data;
                     }
                 }, {

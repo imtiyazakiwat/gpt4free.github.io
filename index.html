@@ -156,7 +156,8 @@
         }
     </style>
     <link rel="stylesheet" href="dist/css/all.min.css">
-    <script src="/dist/js/config.js" async></script>
+    <script src="dist/js/config.js" async></script>
+    <script src="dist/js/translate.js" async></script>
     <script src="https://unpkg.com/es-module-shims@1.7.0/dist/es-module-shims.js"></script>
     <script type="importmap">
         {
@@ -167,7 +168,7 @@
     </script>
 </head>
 <body>
-    <iframe id="background" src="/background.html"></iframe>
+    <iframe id="background" src="background.html"></iframe>
 
     <button class="slide-button">
         <i class="fa-solid fa-arrow-left"></i>
@@ -178,7 +179,7 @@
         <header>
             G4F DEMO
         </header>
-        <div class="description">
+        <div class="description" data-translate="true">
             Welcome to the G4F Web UI! <br>
             Your AI assistant is ready to assist you.
         </div>
@@ -188,7 +189,7 @@
         </div>
 
         <!-- Input and Button -->
-        <form action="/chat/">
+        <form action="chat/">
             <input type="text" name="token" class="input-field" placeholder="Enter an Access Token..." autocomplete="off">
             <div class="button-container">
                 <a id="new_window" href="" class="button hidden" target="_blank">New Window</a>
@@ -204,25 +205,18 @@
             import * as hub from "@huggingface/hub";
             import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
 
-            const connect_status = document.getElementById("connect_status");
-            const valid_urls = []
-            async function check_url(url) {
-                try {
-                    const response = await fetch(`${url}/backend-api/v2/version`);
-                    if (response.ok) {
-                        valid_urls.push(url);
-                        connect_status.innerText = url;
-                        localStorage.setItem("backend_url", url);
-                    }
-                } catch (e) {
-                    if(e.name != 'NetworkError'){
-                        console.error(e);
+            (async function() {
+                if (!window.backendUrl || !await checkUrl(window.backendUrl)) {
+                    for (const url of window.checkUrls) {
+                        await checkUrl(url);
                     }
                 }
-            }
-            window.checkUrls.forEach(async (url) => {
-                await check_url(url);
-            });
+                if (!localStorage.getItem(window.translationKey)) {
+                    if (await translateAll()) {
+                        window.location.reload();
+                    }
+                }
+            })();
 
             const isIframe = window.self !== window.top;
             const button = document.querySelector('form a.button');
@@ -253,7 +247,7 @@
                 localStorage.setItem("HuggingFace-api_key", accessToken);
                 localStorage.setItem("user", user.name);
                 localStorage.setItem("report_error", "true")
-                location.href = "/chat/";
+                location.href = "chat/";
             }
             input.addEventListener("input", () => check_access_token());
             input.addEventListener("click", () => check_access_token());
