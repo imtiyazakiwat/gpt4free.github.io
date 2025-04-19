@@ -82,7 +82,7 @@
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {'content-type': 'application/json'},
-                body: JSON.stringify(localStorage.getItem(`conversation:${conversation.id}`))
+                body: JSON.stringify(conversation)
             });
             const share = `${backend_url}/chat/#${encodeURI(conversation.id)}`;
             const qrcodeStatus = document.getElementById('qrcode-status');
