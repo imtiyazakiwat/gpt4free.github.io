@@ -1169,6 +1169,10 @@ ul {
 
 .sidebar.shown {
     width: 400px;
+}
+
+.sidebar-container {
+    display: flex;
     padding: 15px;
 }
 
