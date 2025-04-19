@@ -63,6 +63,9 @@
     <script src="/dist/js/highlight.min.js" async></script>
     <script>
         window.backend_url = localStorage.getItem('backend_url');
+        if (!window.backend_url) {
+            window.location.href = "/";
+        }
         window.conversation_id = "";
     </script>
     <title>G4F Chat</title>
