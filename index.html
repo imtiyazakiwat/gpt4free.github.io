@@ -210,7 +210,7 @@
                 "https://localhost:1337",
             ];
             const valid_urls = []
-            check_urls.forEach(async (url) => {
+            async function check_url(url) {
                 try {
                     const response = await fetch(`${url}/backend-api/v2/version`);
                     if (response.ok) {
@@ -223,21 +223,15 @@
                         console.error(e);
                     }
                 }
+            }
+            check_urls.forEach(async (url) => {
+                await check_url(url);
             });
             for (let i = 2; valid_urls.length < 2 && i < 178; i++) {
-                try {
-                    const url = `http://192.168.178.${i}`;
-                    const response = await fetch(`${url}/backend-api/v2/version`);
-                    if (response.ok) {
-                        valid_urls.push(url);
-                        connect_status.innerText = url;
-                        localStorage.setItem("backend_url", url);
-                    }
-                } catch (e) {
-                    if(e.name != 'NetworkError'){
-                        console.error(e);
-                    }
-                }
+                let url = `http://192.168.178.${i}:8080`;
+                await check_url(url);
+                url = `http://192.168.178.${i}:1337`;
+                await check_url(url);
             }
 
             const isIframe = window.self !== window.top;
