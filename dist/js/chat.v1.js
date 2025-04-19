@@ -2164,6 +2164,8 @@ chatPrompt.addEventListener("input", function() {
     count_input();
 });
 window.addEventListener("hashchange", (event) => {
+    iframe_container.classList.add("hidden");
+    iframe.src = "";
     const conversation_id = window.location.hash.replace("#", "");
     if (conversation_id == "menu" || conversation_id == "settings") {
         if (conversation_id == "settings") {
