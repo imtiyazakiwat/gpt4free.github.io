@@ -2241,7 +2241,7 @@ async function on_load() {
         await load_conversations();
         return;
     }
-    const conversation_id = window.location.query.replace("?", "");
+    const conversation_id = window.location.search.replace("?", "");
     if (conversation_id) {
         window.conversation_id = conversation_id
     } else {
