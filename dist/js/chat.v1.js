@@ -1922,7 +1922,6 @@ async function hide_settings() {
     Array.from(provider_forms).forEach((form) => form.classList.add("hidden"));
 }
 
-window.addEventListener('popstate', hide_sidebar, false);
 
 sidebar_buttons.forEach((el)=>el.addEventListener("click", async () => {
     if (sidebar.classList.contains("shown") || el.classList.contains("rotated")) {
@@ -2164,7 +2163,23 @@ chatPrompt.addEventListener("input", function() {
     countFocus = userInput;
     count_input();
 });
-
+window.addEventListener("hashchange", (event) => {
+    const conversation_id = window.location.hash.replace("#", "");
+    if (conversation_id == "menu" || conversation_id == "settings") {
+        if (conversation_id == "settings") {
+            open_settings();
+        }
+        return;
+    }
+    hide_sidebar(true);
+    if (conversation_id) {
+        window.conversation_id = conversation_id;
+        set_conversation(conversation_id);
+    } else {
+        window.conversation_id = generateUUID();
+        new_conversation();
+    }
+});
 window.addEventListener('load', async function() {
     let conversation = await get_conversation(window.conversation_id);
     if (conversation && !conversation.share) {
