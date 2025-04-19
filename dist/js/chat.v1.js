@@ -469,7 +469,7 @@ const register_message_buttons = async () => {
         }
         el.dataset.click = true;
         el.addEventListener("click", async () => {
-            iframe.src = '/qrcode.html' + (window.conversation_id ? `?${window.conversation_id}` : '');
+            iframe.src = '/qrcode.html' + (window.conversation_id ? `#${window.conversation_id}` : '');
             iframe_container.classList.remove("hidden");
         });
     });
@@ -2171,7 +2171,7 @@ window.addEventListener('load', async function() {
         return await load_conversation(conversation);
     }
     const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.conversation_id}`, {
-        headers: {'accept': 'application/json'},
+        headers: {'accept': 'application/json', 'if-none-match': '-1'},
     });
     if (!response.ok) {
         return await load_conversation(conversation);
