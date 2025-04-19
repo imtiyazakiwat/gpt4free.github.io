@@ -2198,46 +2198,38 @@ window.addEventListener('load', async function() {
         await load_conversation(conversation);
         await save_conversation(conversation.id, conversation);
         await load_conversations();
-        if (!conversation.share) {
-            // Continue after copy conversation
-            return;
-        }
-        let refreshOnHide = true;
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                refreshOnHide = false;
-            } else {
-                refreshOnHide = true;
-            }
-        });
-        setInterval(async () => {
-            if (!refreshOnHide) {
-                return;
-            }
-            conversation = await get_conversation(window.conversation_id);
-            if (!conversation.share) {
-                return
-            }
-            const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${conversation.id}`, {
-                headers: {
-                    'accept': 'application/json',
-                    'if-none-match': conversation.updated,
-                },
-            });
-            if (response.status == 200) {
-                const new_conversation = await response.json();
-                if (conversation.id == window.conversation_id && new_conversation.updated != conversation.updated) {
-                    conversation = new_conversation;
-                    await save_conversation(conversation.id, conversation);
-                    await load_conversations();
-                    await load_conversation(conversation);
-                }
-            }
-        }, 5000);
-        return;
     }
     await safe_load_conversation(window.conversation_id, false);
 });
+
+let refreshOnHidden = true;
+document.addEventListener("visibilitychange", () => {
+    refreshOnHidden = !document.hidden;
+});
+setInterval(async () => {
+    if (!refreshOnHidden || !window.conversation_id) {
+        return;
+    }
+    const conversation = await get_conversation(window.conversation_id);
+    if (!conversation.share) {
+        return
+    }
+    const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${conversation.id}`, {
+        headers: {
+            'accept': 'application/json',
+            'if-none-match': conversation.updated,
+        },
+    });
+    if (response.status == 200) {
+        const new_conversation = await response.json();
+        if (conversation.id == window.conversation_id && new_conversation.updated != conversation.updated) {
+            conversation = new_conversation;
+            await save_conversation(conversation.id, conversation);
+        }
+    }
+    await load_conversations();
+    await load_conversation(conversation);
+}, 5000);
 
 window.addEventListener('DOMContentLoaded', async function() {
     await on_load();

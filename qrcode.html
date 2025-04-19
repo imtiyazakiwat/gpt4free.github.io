@@ -66,6 +66,7 @@
         let share_id = null;
         document.getElementById('generateQRCode').addEventListener('click', async () => {
             if (share_id) {
+                localStorage.getItem(`conversation:${share_id}`);
                 const delete_url = `${backend_url}/backend-api/v2/files/${encodeURI(share_id)}`;
                 await fetch(delete_url, {
                     method: 'DELETE'
@@ -76,6 +77,8 @@
                 conversation.share = conversation.id;
                 share_id = crypto.randomUUID();
                 conversation.id = share_id;
+                conversation.updated = Date.now();
+                localStorage.setItem(`conversation:${share_id}`, JSON.stringify(conversation));
             }
             const url = `${backend_url}/backend-api/v2/chat/${encodeURI(conversation.id)}`;
             const response = await fetch(url, {
