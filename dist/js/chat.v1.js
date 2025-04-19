@@ -1262,12 +1262,13 @@ function sanitize(input, replacement) {
 async function set_conversation_title(conversation_id, title) {
     conversation = await get_conversation(conversation_id)
     conversation.new_title = title;
+    delete conversation.share;
     const new_id = sanitize(title, " ");
     if (new_id && !appStorage.getItem(`conversation:${new_id}`)) {
         appStorage.removeItem(`conversation:${conversation.id}`);
         title_ids_storage[conversation_id] = new_id;
         conversation.id = new_id;
-        add_url_to_history(`/chat/?${conversation_id}`);
+        add_url_to_history(`/chat/#${conversation_id}`);
     }
     appStorage.setItem(
         `conversation:${conversation.id}`,
@@ -1355,7 +1356,7 @@ const set_conversation = async (conversation_id) => {
         conversation_id = title_ids_storage[conversation_id];
     }
     try {
-        add_url_to_history(`/chat/?${conversation_id}`);
+        add_url_to_history(`/chat/#${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
@@ -1698,7 +1699,7 @@ async function add_conversation(conversation_id) {
         }));
     }
     try {
-        add_url_to_history(`/chat/?${conversation_id}`);
+        add_url_to_history(`/chat/#${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
