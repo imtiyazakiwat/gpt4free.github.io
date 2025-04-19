@@ -71,13 +71,13 @@
                     method: 'DELETE'
                 });
             }
-            const url = `${backend_url}/backend-api/v2/chat/${encodeURI(share_id)}`;
             let conversation = JSON.parse(localStorage.getItem(`conversation:${conversation_id}`));
             if (!conversation.share) {
                 conversation.share = conversation.id;
                 share_id = crypto.randomUUID();
                 conversation.id = share_id;
             }
+            const url = `${backend_url}/backend-api/v2/chat/${encodeURI(conversation.id)}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {'content-type': 'application/json'},
