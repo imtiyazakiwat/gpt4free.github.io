@@ -84,7 +84,7 @@
                 headers: {'content-type': 'application/json'},
                 body: JSON.stringify(conversation)
             });
-            const share = `${backend_url}/chat/#${encodeURI(conversation.id)}`;
+            const share = `${window.location.origin}/chat/#${encodeURI(conversation.id)}`;
             const qrcodeStatus = document.getElementById('qrcode-status');
             if (response.status !== 200) {
                 qrcodeStatus.innerText = 'Error generating QR code: ' + response.statusText;
