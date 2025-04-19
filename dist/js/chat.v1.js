@@ -1369,7 +1369,7 @@ const set_conversation = async (conversation_id) => {
 };
 
 const new_conversation = async (private = false) => {
-    if (window.location.search) {
+    if (window.location.hash) {
         history.pushState({}, null, `/chat/`);
     }
     window.conversation_id = private ? null : generateUUID();
@@ -2241,7 +2241,7 @@ async function on_load() {
         await load_conversations();
         return;
     }
-    const conversation_id = window.location.search.replace("?", "");
+    const conversation_id = window.location.hash.replace("#", "");
     if (conversation_id) {
         window.conversation_id = conversation_id;
     } else {
@@ -2249,7 +2249,7 @@ async function on_load() {
     }
     chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
     chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
-    let chat_params = new URLSearchParams(window.location.search);
+    let chat_params = new URLSearchParams(window.location.query);
     if (chat_params.get("prompt")) {
         userInput.value = chat_params.get("prompt");
         userInput.style.height = "100%";
@@ -2257,6 +2257,8 @@ async function on_load() {
         await load_conversations();
     } else if (!conversation_id) {
         await new_conversation();
+    } else {
+        await load_conversations();
     }
     if (window.hljs) {
         hljs.addPlugin(new HtmlRenderPlugin())
