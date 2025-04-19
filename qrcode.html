@@ -74,12 +74,17 @@
             share_id = crypto.randomUUID();
 
             const url = `${share_url}/backend-api/v2/chat/${encodeURI(share_id)}`;
+            let conversation = JSON.parse(localStorage.getItem(`conversation:${conversation_id}`));
+            if (!conversation.share) {
+                conversation.share = conversation.id;
+                conversation.id = crypto.randomUUID();
+            }
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {'content-type': 'application/json'},
-                body: localStorage.getItem(`conversation:${conversation_id}`)
+                body: JSON.stringify(localStorage.getItem(`conversation:${conversation.id}`))
             });
-            const share = `${share_url}/chat/${encodeURI(share_id)}/${encodeURI(conversation_id)}`;
+            const share = `${share_url}/chat/#${encodeURI(conversation.id)}`;
             const qrcodeStatus = document.getElementById('qrcode-status');
             if (response.status !== 200) {
                 qrcodeStatus.innerText = 'Error generating QR code: ' + response.statusText;

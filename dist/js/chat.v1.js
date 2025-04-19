@@ -96,7 +96,7 @@ if (window.markdownit) {
             .replaceAll('&quot;&gt;&lt;/audio&gt;', '"></audio>')
             .replaceAll('&lt;iframe type=&quot;text/html&quot; src=&quot;', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
             .replaceAll('&quot;&gt;&lt;/iframe&gt;', `?enablejsapi=1"></iframe>`)
-            .replaceAll('src="/media/', `src="${window.backend_url}/media/`)
+            .replaceAll('src="/', `src="${window.backend_url}/`)
     }
 }
 
@@ -1333,8 +1333,8 @@ const delete_conversation = async (conversation_id) => {
             }
         }
     }
-    if (window.share_id && conversation_id == window.start_id) {
-        const url = `${window.backend_url}/backend-api/v2/files/${window.share_id}`;
+    if (conversation.share) {
+        const url = `${window.backend_url}/backend-api/v2/files/${conversation.id}`;
         await fetch(url, {
             method: 'DELETE'
         });
@@ -1369,7 +1369,7 @@ const set_conversation = async (conversation_id) => {
 };
 
 const new_conversation = async (private = false) => {
-    if (!/\/chat\/(share|\?|$)/.test(window.location.href)) {
+    if (!/\/chat\/(\?|$)/.test(window.location.href)) {
         history.pushState({}, null, `/chat/`);
     }
     window.conversation_id = private ? null : generateUUID();
@@ -1446,7 +1446,7 @@ const load_conversation = async (conversation, scroll=true) => {
         document.title = title;
     }
     const chatHeader = document.querySelector(".chat-top-panel .convo-title");
-    if (window.share_id && conversation.id == window.start_id) {
+    if (conversation.share) {
         chatHeader.innerHTML = '<i class="fa-solid fa-qrcode"></i> ' + escapeHtml(conversation_title);
     } else {
         chatHeader.innerText = conversation_title;
@@ -1732,8 +1732,8 @@ const remove_message = async (conversation_id, index) => {
     conversation.items = new_items;
     const data = get_conversation_data(conversation);
     await save_conversation(conversation_id, data);
-    if (window.share_id && window.conversation_id == window.start_id) {
-        const url = `${window.backend_url}/backend-api/v2/chat/${window.share_id}`;
+    if (conversation.share) {
+        const url = `${window.backend_url}/backend-api/v2/chat/${conversation.id}`;
         await fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
@@ -1819,8 +1819,8 @@ const add_message = async (
     }
     data = get_conversation_data(conversation);
     await save_conversation(conversation_id, data);
-    if (window.share_id && conversation_id == window.start_id) {
-        const url = `${window.backend_url}/backend-api/v2/chat/${window.share_id}`;
+    if (conversation.share) {
+        const url = `${window.backend_url}/backend-api/v2/chat/${conversation.id}`;
         fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
@@ -1861,7 +1861,7 @@ const load_conversations = async () => {
         //     appStorage.removeItem(`conversation:${conversation.id}`);
         //     return;
         // }
-        const shareIcon = (conversation.id == window.start_id && window.share_id) ? '<i class="fa-solid fa-qrcode"></i>': '';
+        const shareIcon = conversation.share ? '<i class="fa-solid fa-qrcode"></i>': '';
         let convo = document.createElement("div");
         convo.classList.add("convo");
         convo.id = `convo-${conversation.id}`;
@@ -2165,30 +2165,22 @@ chatPrompt.addEventListener("input", function() {
 });
 
 window.addEventListener('load', async function() {
-    if (!window.share_id) {
-        return await load_conversation(JSON.parse(appStorage.getItem(`conversation:${window.conversation_id}`)));
+    let conversation = await get_conversation(window.conversation_id);
+    if (conversation && !conversation.share) {
+        return await load_conversation(conversation);
     }
-    if (!window.conversation_id) {
-        window.conversation_id = window.share_id;
-    }
-    const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.share_id}`, {
-        headers: {'accept': 'application/json', 'x-conversation-id': window.conversation_id},
+    const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.conversation_id}`, {
+        headers: {'accept': 'application/json'},
     });
     if (!response.ok) {
-        return await load_conversation(JSON.parse(appStorage.getItem(`conversation:${window.conversation_id}`)));
+        return await load_conversation(conversation);
     }
-    let conversation = await response.json();
-    if (!appStorage.getItem(`conversation:${window.conversation_id}`) || conversation.id == window.conversation_id) {
-        // Copy conversation from share
-        if (conversation.id != window.conversation_id) {
-            window.conversation_id = conversation.id;
-            conversation.updated = Date.now();
-            window.share_id = null;
-        }
+    conversation = await response.json();
+    if (conversation.id == window.conversation_id) {
         await load_conversation(conversation);
         await save_conversation(conversation.id, conversation);
         await load_conversations();
-        if (!window.share_id) {
+        if (!conversation.share) {
             // Continue after copy conversation
             return;
         }
@@ -2200,33 +2192,25 @@ window.addEventListener('load', async function() {
                 refreshOnHide = true;
             }
         });
-        // Start chat mode (QRCode)
-        var refreshIntervalId = setInterval(async () => {
-            if (!window.share_id) {
-                clearInterval(refreshIntervalId);
-                return;
-            }
+        setInterval(async () => {
             if (!refreshOnHide) {
                 return;
             }
-            if (window.conversation_id != window.start_id) {
-                return;
+            conversation = await get_conversation(window.conversation_id);
+            if (!conversation.share) {
+                return
             }
-            const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.share_id}`, {
+            const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${conversation.id}`, {
                 headers: {
                     'accept': 'application/json',
                     'if-none-match': conversation.updated,
-                    'x-conversation-id': conversation.id,
                 },
             });
             if (response.status == 200) {
                 const new_conversation = await response.json();
                 if (conversation.id == window.conversation_id && new_conversation.updated != conversation.updated) {
                     conversation = new_conversation;
-                    appStorage.setItem(
-                        `conversation:${conversation.id}`,
-                        JSON.stringify(conversation)
-                    );
+                    await save_conversation(conversation.id, conversation);
                     await load_conversations();
                     await load_conversation(conversation);
                 }
@@ -2242,9 +2226,6 @@ window.addEventListener('DOMContentLoaded', async function() {
     if (window.conversation_id == "{{conversation_id}}") {
         window.conversation_id = generateUUID();
     } else {
-        if (!window.conversation_id) {
-            window.conversation_id = generateUUID();
-        }
         await on_api();
     }
 });
@@ -2259,21 +2240,24 @@ async function on_load() {
     if (location_hash == "settings") {
         open_settings();
         await load_conversations();
-      } else if (location_hash) {
-        //load_conversation(window.conversation_id);
+        return;
+    }
+    if (location_hash) {
+        window.conversation_id = location_hash
+    } else {
+        window.conversation_id = generateUUID();
+    }
+    chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
+    chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
+    let chat_url = new URL(window.location.href)
+    let chat_params = new URLSearchParams(chat_url.search);
+    if (chat_params.get("prompt")) {
+        userInput.value = chat_params.get("prompt");
+        userInput.style.height = "100%";
+        userInput.focus();
         await load_conversations();
     } else {
-        chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
-        chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
-        let chat_url = new URL(window.location.href)
-        let chat_params = new URLSearchParams(chat_url.search);
-        if (chat_params.get("prompt")) {
-            userInput.value = chat_params.get("prompt");
-            userInput.style.height = "100%";
-            userInput.focus();
-        } else {
-            await new_conversation();
-        }
+        await new_conversation();
     }
     if (window.hljs) {
         hljs.addPlugin(new HtmlRenderPlugin())
