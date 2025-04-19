@@ -469,7 +469,7 @@ const register_message_buttons = async () => {
         }
         el.dataset.click = true;
         el.addEventListener("click", async () => {
-            iframe.src = '/qrcode.html' + (window.conversation_id ? `#${window.conversation_id}` : '');
+            iframe.src = '/qrcode.html' + (window.conversation_id ? `?${window.conversation_id}` : '');
             iframe_container.classList.remove("hidden");
         });
     });
@@ -1267,7 +1267,7 @@ async function set_conversation_title(conversation_id, title) {
         appStorage.removeItem(`conversation:${conversation.id}`);
         title_ids_storage[conversation_id] = new_id;
         conversation.id = new_id;
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`/chat/?${conversation_id}`);
     }
     appStorage.setItem(
         `conversation:${conversation.id}`,
@@ -1355,7 +1355,7 @@ const set_conversation = async (conversation_id) => {
         conversation_id = title_ids_storage[conversation_id];
     }
     try {
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`/chat/?${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
@@ -1369,7 +1369,7 @@ const set_conversation = async (conversation_id) => {
 };
 
 const new_conversation = async (private = false) => {
-    if (!/\/chat\/(\?|$)/.test(window.location.href)) {
+    if (window.location.search) {
         history.pushState({}, null, `/chat/`);
     }
     window.conversation_id = private ? null : generateUUID();
@@ -1698,7 +1698,7 @@ async function add_conversation(conversation_id) {
         }));
     }
     try {
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`/chat/?${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
@@ -1910,7 +1910,7 @@ async function hide_sidebar(remove_shown=false) {
     chat.classList.remove("hidden");
     log_storage.classList.add("hidden");
     await hide_settings();
-    if (window.location.pathname.endsWith("/menu/") || window.location.pathname.endsWith("/settings/")) {
+    if (window.location.hash.endsWith("#menu") || window.location.pathname.endsWith("#settings")) {
         history.back();
     }
 }
@@ -2236,14 +2236,14 @@ window.addEventListener('pywebviewready', async function() {
 
 async function on_load() {
     count_input();
-    const location_hash = window.location.hash.replace("#", "");
-    if (location_hash == "settings") {
+    if (window.location.hash == "#settings") {
         open_settings();
         await load_conversations();
         return;
     }
-    if (location_hash) {
-        window.conversation_id = location_hash
+    const conversation_id = window.location.query.replace("?", "");
+    if (conversation_id) {
+        window.conversation_id = conversation_id
     } else {
         window.conversation_id = generateUUID();
     }
