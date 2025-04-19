@@ -211,7 +211,7 @@
             ];
             const valid_urls = []
             check_urls.forEach(async (url) => {
-                response = await fetch(`${url}/backend-api/v2/version`)
+                const response = await fetch(`${url}/backend-api/v2/version`)
                 if (response.ok) {
                     valid_urls.push(url);
                     connect_status.innerText = url;
