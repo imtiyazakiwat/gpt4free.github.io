@@ -2249,8 +2249,7 @@ async function on_load() {
     }
     chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
     chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
-    let chat_url = new URL(window.location.href)
-    let chat_params = new URLSearchParams(chat_url.search);
+    let chat_params = new URLSearchParams(window.location.search);
     if (chat_params.get("prompt")) {
         userInput.value = chat_params.get("prompt");
         userInput.style.height = "100%";
