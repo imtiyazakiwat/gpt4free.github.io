@@ -32,7 +32,7 @@
 
     <script type="module">
         const backend_url = localStorage.getItem('backend_url');
-        const conversation_id = window.location.query.replace("?", "");
+        const conversation_id = window.location.search.replace("?", "");
         if (!conversation_id) {
             document.getElementById('generateQRCode')
                 .setAttribute('disabled', 'disabled');
