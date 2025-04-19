@@ -2243,7 +2243,7 @@ async function on_load() {
     }
     const conversation_id = window.location.search.replace("?", "");
     if (conversation_id) {
-        window.conversation_id = conversation_id
+        window.conversation_id = conversation_id;
     } else {
         window.conversation_id = generateUUID();
     }
@@ -2255,7 +2255,7 @@ async function on_load() {
         userInput.style.height = "100%";
         userInput.focus();
         await load_conversations();
-    } else {
+    } else if (!conversation_id) {
         await new_conversation();
     }
     if (window.hljs) {
