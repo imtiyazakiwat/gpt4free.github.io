@@ -3006,7 +3006,6 @@ async function load_provider_models(provider=null) {
 };
 providerSelect.addEventListener("change", () => {
     load_provider_models()
-    userInput.focus();
 });
 modelSelect.addEventListener("change", () => userInput.focus());
 modelProvider.addEventListener("change", () =>  userInput.focus());
@@ -3014,7 +3013,6 @@ custom_model.addEventListener("change", () => {
     if (!custom_model.value) {
         load_provider_models();
     }
-    userInput.focus();
 });
 
 document.getElementById("pin").addEventListener("click", async () => {
@@ -3050,7 +3048,6 @@ switchInput.addEventListener("change", () => {
 });
 searchButton.addEventListener("click", async () => {
     switchInput.click();
-    userInput.focus();
 });
 
 function save_storage(settings=false) {
