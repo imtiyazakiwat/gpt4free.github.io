@@ -49,6 +49,7 @@ let countTokensEnabled = true;
 let reloadConversation = true;
 let privateConversation = null;
 let suggestions = null;
+let lastUpdated = null;
 
 userInput.addEventListener("blur", () => {
     document.documentElement.scrollTop = 0;
@@ -1438,6 +1439,7 @@ const load_conversation = async (conversation, scroll=true) => {
     if (!conversation) {
         return;
     }
+    lastUpdated = conversation.updated;
     let messages = conversation?.items || [];
     console.debug("Conversation:", conversation.id)
 
@@ -1738,7 +1740,7 @@ const remove_message = async (conversation_id, index) => {
         await fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
-            body: data,
+            body: JSON.stringify(data),
         });
     }
     if (Array.isArray(old_message.content)) {
@@ -1825,7 +1827,7 @@ const add_message = async (
         fetch(url, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
-            body: data
+            body: JSON.stringify(data),
         });
     }
     return conversation.items.length - 1;
@@ -2188,7 +2190,7 @@ window.addEventListener('load', async function() {
         return await load_conversation(conversation);
     }
     const response = await fetch(`${window.backend_url}/backend-api/v2/chat/${window.conversation_id}`, {
-        headers: {'accept': 'application/json', 'if-none-match': '-1'},
+        headers: {'accept': 'application/json'},
     });
     if (!response.ok) {
         return await load_conversation(conversation);
@@ -2227,8 +2229,10 @@ setInterval(async () => {
             await save_conversation(conversation.id, conversation);
         }
     }
-    await load_conversations();
-    await load_conversation(conversation);
+    if (lastUpdated != conversation.updated) {
+        await load_conversations();
+        await load_conversation(conversation);
+    }
 }, 5000);
 
 window.addEventListener('DOMContentLoaded', async function() {
@@ -2903,7 +2907,6 @@ async function api(ressource, args=null, files=null, message_id=null, scroll=tru
             if (ressource == "log" && !document.getElementById("report_error").checked) {
                 return;
             }
-            url = `https://roxky-g4f-backup.hf.space${url}`;
         }
         headers['content-type'] = 'application/json';
         response = await fetch(url, {
