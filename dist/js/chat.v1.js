@@ -2333,7 +2333,7 @@ async function on_api() {
         userInput.style.height = "100%";
     });
     userInput.addEventListener("blur", async (evt) => {
-        userInput.style.height = "";
+        setTimeout(() => userInput.style.height = "", 100);
     });
     sendButton.addEventListener(`click`, async () => {
         console.log("clicked send");
