@@ -1,7 +1,7 @@
 window.translationKey = "translations" + document.location.pathname;
 window.translations = JSON.parse(localStorage.getItem(window.translationKey) || "{}");
-window.addEventListener('DOMContentLoaded', async function() {
-    const elements = document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label, i");
+function translateElements(elements = null) {
+    elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label, i");
     elements.forEach(function (element) {
         element.innerText = window.translate(element.innerText);
         if (element.alt) {
@@ -14,6 +14,9 @@ window.addEventListener('DOMContentLoaded', async function() {
             element.placeholder = window.translate(element.placeholder);
         }
     });
+}
+window.addEventListener('DOMContentLoaded', async function() {
+    translateElements();
 });
 let newTranslations = [];
 window.translate = (text) => {
