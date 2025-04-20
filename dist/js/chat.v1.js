@@ -876,7 +876,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         await save_conversation(conversation_id, get_conversation_data(conversation));
     } else if (message.type == "auth") {
         error_storage[message_id] = message.message
-        content_map.inner.innerHTML += markdown_render(`**An error occured:** ${message.message}`);
+        content_map.inner.innerHTML += markdown_render(`${window.translate('**An error occured:**')} ${message.message}`);
         let provider = provider_storage[message_id]?.name;
         let configEl = document.querySelector(`.settings .${provider}-api_key`);
         if (configEl) {
@@ -891,7 +891,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
             <a href="${message.provider.url}" target="_blank">
                 ${message.provider.label ? message.provider.label : message.provider.name}
             </a>
-            ${message.provider.model ? ' with ' + message.provider.model : ''}
+            ${message.provider.model ? ' ' + window.translate('with') + ' ' + message.provider.model : ''}
         `;
     } else if (message.type == "message") {
         console.error(message.message)
@@ -901,7 +901,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         content_map.update_timeouts = [];
         error_storage[message_id] = message.message
         console.error(message.message);
-        content_map.inner.innerHTML += markdown_render(`**An error occured:** ${message.message}`);
+        content_map.inner.innerHTML += markdown_render(`${window.translate('**An error occured:**')} ${message.message}`);
         if (finish_message) {
             await finish_message();
         }
@@ -2101,7 +2101,7 @@ function count_words_and_tokens(text, model, completion_tokens, prompt_tokens) {
         return "";
     }
     text = filter_message(text);
-    return `(${count_words(text)} words, ${count_chars(text)} chars, ${completion_tokens ? completion_tokens : count_tokens(model, text, prompt_tokens)} tokens)`;
+    return `(${count_words(text)} ${window.translate('words')}, ${count_chars(text)} ${window.translate('chars')}, ${completion_tokens ? completion_tokens : count_tokens(model, text, prompt_tokens)} ${window.translate('tokens')})`;
 }
 
 function update_message(content_map, message_id, content = null, scroll = true) {
@@ -2127,7 +2127,7 @@ function update_message(content_map, message_id, content = null, scroll = true) 
             }
         }
         if (error_storage[message_id]) {
-            content += markdown_render(`**An error occured:** ${error_storage[message_id]}`);
+            content += markdown_render(`${window.translate('**An error occured:**')} ${error_storage[message_id]}`);
         }
         content_map.inner.innerHTML = content;
         if (countTokensEnabled) {
@@ -2310,9 +2310,27 @@ const load_provider_option = (input, provider_name) => {
         providerSelect.querySelectorAll(`option[data-parent="${provider_name}"]`).forEach(
             (el) => el.setAttribute("disabled", "disabled")
         );
-        //settings.querySelector(`.field:has(#${provider_name}-api_key)`)?.classList.add("hidden");
     }
 };
+
+model_tags = {
+    image: "🖼️ Image Generation",
+    vision: "👓 Image Upload",
+    audio: "🎧 Audio Generation",
+    video: "🎥 Video Generation"
+}
+
+for (let [name, text] of Object.entries(model_tags)) {
+    model_tags[name] = window.translate(text);
+}
+
+function get_model_tags(model) {
+    const parts = []
+    for (let [name, text] of Object.entries(model_tags)) {
+       parts.push(model[name] ? ` (${text})` : "")
+    }
+    return parts.join("");
+}
 
 async function on_api() {
     load_version();
@@ -2356,7 +2374,7 @@ async function on_api() {
     models.forEach((model) => {
         let option = document.createElement("option");
         option.value = model.name;
-        option.text = model.name + (model.image ? " (🖼️ Image Generation)" : "") + (model.vision ? " (👓 Image Upload)" : "") + (model.audio ? " (🎧 Audio Generation)" : "") + (model.video ? " (🎥 Video Generation)" : "");
+        option.text = model.name + get_model_tags(model);
         option.dataset.providers = model.providers.join(" ");
         modelSelect.appendChild(option);
         is_demo = model.demo;
@@ -2374,7 +2392,7 @@ async function on_api() {
             <option value="Grok">Grok Provider</option>
             <option value="OpenaiChat">OpenAI Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
-            <option value="G4F">G4F framework</option>
+            <option value="LMArenaProvider">LM Arena</option>
             <option value="Gemini">Gemini Provider</option>
             <option value="HuggingFace">HuggingFace</option>
             <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
@@ -2403,10 +2421,7 @@ async function on_api() {
             option.value = provider.name;
             option.dataset.label = provider.label;
             option.text = provider.label
-                + (provider.vision ? " (Image Upload)" : "")
-                + (provider.image ? " (Image Generation)" : "")
-                + (provider.audio ? " (Audio Generation)" : "")
-                + (provider.video ? " (Video Generation)" : "")
+                + get_model_tags(provider)
                 + (provider.nodriver ? " (Browser)" : "")
                 + (provider.hf_space ? " (HuggingSpace)" : "")
                 + (!provider.nodriver && provider.auth ? " (Auth)" : "");
@@ -2997,7 +3012,7 @@ async function load_provider_models(provider=null) {
             let option = document.createElement('option');
             option.value = model.model;
             option.dataset.label = model.model;
-            option.text = model.model + (model.count > 1 ? ` (${model.count}+)` : "") + (model.image ? " (🖼️ Image Generation)" : "") + (model.vision ? " (👓 Image Upload)" : "") + (model.audio ? " (🎧 Audio Generation)" : "") + (model.video ? " (🎥 Video Generation)" : "");
+            option.text = model.model + (model.count > 1 ? ` (${model.count}+)` : "") + get_model_tags(model);
 
             if (model.task) {
                 option.text += ` (${model.task})`;
