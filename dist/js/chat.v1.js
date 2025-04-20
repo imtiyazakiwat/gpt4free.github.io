@@ -30,6 +30,14 @@ const paperclip         = document.querySelector(".user-input .fa-paperclip");
 
 const optionElementsSelector = ".settings input, .settings textarea, .chat-body input, #model, #model2, #provider";
 
+translationSnipptes = [
+    "with", "**An error occured:**", "Private Conversation", "New Conversation", "Regenerate", "Continue",
+    "Hello! How can I assist you today?", "words", "chars", "tokens",
+    "{0} Messages were imported", "{0} File(s) uploaded successfully",
+    "{0} Conversations/Settings were imported successfully",
+    "No content found", "Files are loaded successfully",
+    "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)"];
+
 let provider_storage = {};
 let message_storage = {};
 let controller_storage = {};
@@ -1547,8 +1555,6 @@ const load_conversation = async (conversation, scroll=true) => {
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </button>`);
             }
-        } else {
-            window.translate('Continue');
         }
 
         countTokensEnabled = appStorage.getItem("countTokens") != "false";
@@ -2188,7 +2194,7 @@ window.addEventListener("hashchange", (event) => {
 });
 window.addEventListener('load', async function() {
     await on_load();
-    if (window.conversation_id == "{{conversation_id}}") {
+    if (!window.conversation_id || window.conversation_id == "{{conversation_id}}") {
         window.conversation_id = generateUUID();
     } else {
         await on_api();
@@ -2210,6 +2216,8 @@ window.addEventListener('load', async function() {
         await load_conversations();
     }
     await safe_load_conversation(window.conversation_id, false);
+
+    translationsSnippets.forEach((snippet)=>this.window.translate(snippet));
 });
 
 let refreshOnHidden = true;
@@ -2677,7 +2685,7 @@ async function upload_cookies() {
         body: formData,
     });
     if (response.status == 200) {
-        inputCount.innerText = window.translate('{0} was uploaded successfully').replace('{0}', file.name);
+        inputCount.innerText = window.translate("{0} File(s) uploaded successfully").replace('{0}', file.name);
     }
     fileInput.value = "";
 }

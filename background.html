@@ -86,7 +86,7 @@
         }
     </style>
     <link rel="stylesheet" href="dist/css/all.min.css">
-    <script src="dist/js/config.js" async></script>
+    <script src="dist/js/framework.js" async></script>
 </head>
 <body>
     <img id="image-feed" class="hidden" alt="Image Feed">
@@ -96,6 +96,7 @@
     <div class="gradient"></div>
     <script>
         (async () => {
+            window.backendUrl = window.backendUrl || "";
             const videoUrl = window.backendUrl + "/search/video?skip=";
             const url = "https://image.pollinations.ai/feed";
             const imageFeed = document.getElementById("image-feed");
