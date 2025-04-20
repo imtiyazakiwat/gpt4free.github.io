@@ -16,7 +16,7 @@ window.addEventListener('DOMContentLoaded', async function() {
     });
 });
 let newTranslations = [];
-function translate(text) {
+window.translate = (text) => {
     const endWithSpace = text.endsWith(" ");
     text = text.trim();
     if (text in window.translations && window.translations[text]) {
@@ -24,7 +24,7 @@ function translate(text) {
     }
     text ? newTranslations.push(text) : null;
     return text;
-}
+};
 window.translateAll = async () =>{
     let allTranslations = {...window.translations};
     for (const text of newTranslations) {
