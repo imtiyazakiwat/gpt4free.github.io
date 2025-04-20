@@ -1376,7 +1376,7 @@ const new_conversation = async (private = false) => {
     }
     window.conversation_id = private ? null : generateUUID();
     document.title = window.title || document.title;
-    document.querySelector(".chat-top-panel .convo-title").innerText = private ? translate("Private Conversation") : translate("New Conversation");
+    document.querySelector(".chat-top-panel .convo-title").innerText = private ? window.translate("Private Conversation") : window.translate("New Conversation");
 
     await clear_conversation();
     if (chatPrompt) {
@@ -1483,7 +1483,7 @@ const load_conversation = async (conversation, scroll=true) => {
         let provider = provider_link ? `
             <div class="provider" data-provider="${item.provider.name}">
                 ${provider_link}
-                ${item.provider.model ? ' ' + translate('with') + ' ' + item.provider.model : ''}
+                ${item.provider.model ? ' ' + window.translate('with') + ' ' + item.provider.model : ''}
             </div>
         ` : "";
         let synthesize_params = {text: buffer}
@@ -1536,19 +1536,19 @@ const load_conversation = async (conversation, scroll=true) => {
 
         if (actions.includes("variant")) {
             add_buttons.push(`<button class="regenerate_button">
-                <span>${translate('Regenerate')}</span>
+                <span>${window.translate('Regenerate')}</span>
                 <i class="fa-solid fa-rotate"></i>
             </button>`);
         }
         if (actions.includes("continue")) {
             if (messages.length >= i - 1) {
                 add_buttons.push(`<button class="continue_button">
-                    <span>${translate('Continue')}</span>
+                    <span>${window.translate('Continue')}</span>
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </button>`);
             }
         } else {
-            translate('Continue');
+            window.translate('Continue');
         }
 
         countTokensEnabled = appStorage.getItem("countTokens") != "false";
@@ -2041,7 +2041,7 @@ const load_settings_storage = async () => {
 }
 
 const say_hello = async () => {
-    tokens = translate(`Hello! How can I assist you today?`).split(" ").map((token) => token + " ");
+    tokens = window.translate(`Hello! How can I assist you today?`).split(" ").map((token) => token + " ");
 
     chatBody.innerHTML += `
         <div class="message">
@@ -2437,7 +2437,7 @@ async function on_api() {
         providersContainer.classList.add("field", "collapsible");
         providersContainer.innerHTML = `
             <div class="collapsible-header">
-                <span class="label">${translate('Providers (Enable/Disable)')}</span>
+                <span class="label">${window.translate('Providers (Enable/Disable)')}</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="collapsible-content hidden"></div>
@@ -2476,7 +2476,7 @@ async function on_api() {
     providersListContainer.classList.add("field", "collapsible");
     providersListContainer.innerHTML = `
         <div class="collapsible-header">
-            <span class="label">${translate('Providers API key')}</span>
+            <span class="label">${window.translate('Providers API key')}</span>
             <i class="fa-solid fa-chevron-down"></i>
         </div>
         <div class="collapsible-content api-key hidden"></div>
