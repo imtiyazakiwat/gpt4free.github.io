@@ -1178,6 +1178,7 @@ ul {
     padding: 15px;
     flex-direction: column;
     flex: 1;
+    overflow: auto;
 }
 
 /* style for hljs copy */
