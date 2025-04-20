@@ -2187,6 +2187,12 @@ window.addEventListener("hashchange", (event) => {
     }
 });
 window.addEventListener('load', async function() {
+    await on_load();
+    if (window.conversation_id == "{{conversation_id}}") {
+        window.conversation_id = generateUUID();
+    } else {
+        await on_api();
+    }
     let conversation = await get_conversation(window.conversation_id);
     if (conversation && !conversation.share) {
         return await load_conversation(conversation);
@@ -2236,15 +2242,6 @@ setInterval(async () => {
         await load_conversation(conversation);
     }
 }, 5000);
-
-window.addEventListener('DOMContentLoaded', async function() {
-    await on_load();
-    if (window.conversation_id == "{{conversation_id}}") {
-        window.conversation_id = generateUUID();
-    } else {
-        await on_api();
-    }
-});
 
 window.addEventListener('pywebviewready', async function() {
     await on_api();
