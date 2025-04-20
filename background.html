@@ -86,6 +86,7 @@
         }
     </style>
     <link rel="stylesheet" href="dist/css/all.min.css">
+    <script src="dist/js/config.js" async></script>
 </head>
 <body>
     <img id="image-feed" class="hidden" alt="Image Feed">
@@ -95,8 +96,7 @@
     <div class="gradient"></div>
     <script>
         (async () => {
-            const backend_url = "https://g4f.hopto.org";
-            const video_url = backend_url + "/search/video?skip=";
+            const videoUrl = window.backendUrl + "/search/video?skip=";
             const url = "https://image.pollinations.ai/feed";
             const imageFeed = document.getElementById("image-feed");
             const videoFeed = document.getElementById("video-feed");
@@ -119,18 +119,18 @@
                     gradient.classList.remove("hidden");
                     return;
                 }
-                videoFeed.src = video_url + skipVideo;
+                videoFeed.src = videoUrl + skipVideo;
                 skipVideo++;
             };
             videoFeed.onended = () => {
-                videoFeed.src = video_url + skipVideo;
+                videoFeed.src = videoUrl + skipVideo;
                 skipVideo++;
             };
             videoFeed.onclick = () => {
-                videoFeed.src = video_url + skipVideo;
+                videoFeed.src = videoUrl + skipVideo;
                 skipVideo++;
             };
-            videoFeed.src = video_url;
+            videoFeed.src = videoUrl;
             function initES() {
                 if (es == null || es.readyState == EventSource.CLOSED) {
                     const eventSource = new EventSource(url);
@@ -177,7 +177,7 @@
                     return;
                 }
                 if (errorImage < 3) {
-                    imageFeed.src = backend_url + "/search/image+g4f?skip=" + skipImage;
+                    imageFeed.src = window.backendUrl + "/search/image+g4f?skip=" + skipImage;
                     skipImage++;
                     return;
                 }
@@ -200,7 +200,7 @@
                 errorImage--;
             };
             imageFeed.onclick = () => {
-                imageFeed.src = backend_url + "/search/image?random=" + Math.random();
+                imageFeed.src = window.backendUrl + "/search/image?random=" + Math.random();
                 if (skipRefresh < 4) {
                     skipRefresh += 1;
                 }
