@@ -1037,6 +1037,7 @@ input.model:hover
     gap: var(--inner-gap);
     overflow: auto;
     flex-grow: 1;
+    padding-bottom: var(--inner-gap);
 }
 
 .cursor {

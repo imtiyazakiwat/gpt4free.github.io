@@ -1451,7 +1451,7 @@ const load_conversation = async (conversation, scroll=true) => {
     const chatHeader = document.querySelector(".chat-top-panel .convo-title");
     if (conversation.share) {
         chatHeader.innerHTML = '<i class="fa-solid fa-qrcode"></i> ' + escapeHtml(conversation_title);
-    } else {
+    } else if (window.conversation_id) {
         chatHeader.innerText = conversation_title;
     }
 
@@ -2575,14 +2575,14 @@ async function load_version() {
     let new_version = document.querySelector(".new_version");
     if (new_version) return;
     const versions = await api("version");
-    window.title = 'g4f - ' + versions["version"];
-    if (document.title == "g4f - gui") {
+    window.title = 'G4F - ' + versions["version"];
+    if (document.title == "G4F Chat") {
         document.title = window.title;
     }
     let text = "version ~ "
     if (versions["latest_version"] && versions["version"] != versions["latest_version"]) {
         let release_url = 'https://github.com/xtekky/gpt4free/releases/latest';
-        let title = `New version: ${versions["latest_version"]}`;
+        let title = `${window.translate('New version:')} ${versions["latest_version"]}`;
         text += `<a href="${release_url}" target="_blank" title="${title}">${versions["version"]}</a> 🆕`;
         new_version = document.createElement("div");
         new_version.classList.add("new_version");
@@ -2677,7 +2677,7 @@ async function upload_cookies() {
         body: formData,
     });
     if (response.status == 200) {
-        inputCount.innerText = `${file.name} was uploaded successfully`;
+        inputCount.innerText = window.translate('{0} was uploaded successfully').replace('{0}', file.name);
     }
     fileInput.value = "";
 }
@@ -2697,20 +2697,20 @@ function connectToSSE(url, do_refine, bucket_id) {
     eventSource.onmessage = async (event) => {
         const data = JSON.parse(event.data);
         if (data.error) {
-            inputCount.innerText = `Error: ${data.error.message}`;
+            inputCount.innerText = `${window.translate('Error:')} ${data.error.message}`;
             paperclip.classList.remove("blink");
             fileInput.value = "";
         } else if (data.action == "media") {
-            inputCount.innerText = `File: ${data.filename}`;
+            inputCount.innerText = `${window.translate('File:')} ${data.filename}`;
             const url = `${window.backendUrl}/files/${bucket_id}/media/${data.filename}`;
             const media = [{bucket_id: bucket_id, url: url, name: data.filename}];
             await handle_ask(false, media);
         } else if (data.action == "load") {
-            inputCount.innerText = `Read data: ${formatFileSize(data.size)}`;
+            inputCount.innerText = `${window.translate('Read data:')} ${formatFileSize(data.size)}`;
         } else if (data.action == "refine") {
-            inputCount.innerText = `Refine data: ${formatFileSize(data.size)}`;
+            inputCount.innerText = `${window.translate('Refine data:')} ${formatFileSize(data.size)}`;
         } else if (data.action == "download") {
-            inputCount.innerText = `Download: ${data.count} files`;
+            inputCount.innerText = `${window.translate('Download:')} ${data.count} files`;
         } else if (data.action == "done") {
             if (do_refine) {
                 connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}?refine_chunks_with_spacy=true`, false, bucket_id);
@@ -2719,11 +2719,11 @@ function connectToSSE(url, do_refine, bucket_id) {
             fileInput.value = "";
             paperclip.classList.remove("blink");
             if (!data.size) {
-                inputCount.innerText = "No content found";
+                inputCount.innerText = window.translate("No content found");
                 return
             }
             appStorage.setItem(`bucket:${bucket_id}`, data.size);
-            inputCount.innerText = "Files are loaded successfully";
+            inputCount.innerText = window.translate("Files are loaded successfully");
 
             const url = `${window.backendUrl}/backend-api/v2/files/${bucket_id}`;
             const media = [{bucket_id: bucket_id, url: url}];
@@ -2750,7 +2750,7 @@ async function upload_files(fileInput) {
     });
     const result = await response.json()
     const count = result.files.length + result.media.length;
-    inputCount.innerText = `${count} File(s) uploaded successfully`;
+    inputCount.innerText = window.translate('{0} File(s) uploaded successfully').replace('{0}', count);
     if (result.files.length > 0) {
         let do_refine = document.getElementById("refine")?.checked;
         connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}`, do_refine, bucket_id);
@@ -2801,7 +2801,7 @@ fileInput.addEventListener('change', async (event) => {
                     await load_conversations();
                     await load_settings_storage();
                     fileInput.value = "";
-                    inputCount.innerText = `${count} Conversations/Settings were imported successfully`;
+                    inputCount.innerText = window.translate('{0} Conversations/Settings were imported successfully').replace('{0}', count);
                 } else {
                     is_cookie_file = data.api_key;
                     if (Array.isArray(data)) {
@@ -3118,7 +3118,7 @@ function import_memory() {
         user_id = generateUUID();
         appStorage.setItem("mem0-user_id", user_id);
     }
-    inputCount.innerText = `Start importing to Mem0...`;
+    inputCount.innerText = window.translate("Importing conversations...");
     let conversations = [];
     for (let i = 0; i < appStorage.length; i++) {
         if (appStorage.key(i).startsWith("conversation:")) {
@@ -3142,7 +3142,7 @@ function import_memory() {
         });
         const result = await response.json();
         count += result.count;
-        inputCount.innerText = `${count} Messages were imported`;
+        inputCount.innerText = window.translate('{0} Messages were imported').replace("{0}", count);
         add_conversation_to_memory(i + 1);
     }
     add_conversation_to_memory(0)
