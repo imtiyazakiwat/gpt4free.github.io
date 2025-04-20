@@ -255,7 +255,6 @@
             input.addEventListener("input", () => check_access_token());
             input.addEventListener("click", () => check_access_token());
             form.addEventListener("submit", async (event) => {
-                event.preventDefault();
                 check_access_token();
             });
 
