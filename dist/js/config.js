@@ -17,7 +17,7 @@ async function checkUrl(url) {
         const response = await fetch(`${url}/backend-api/v2/version`);
         if (response.ok) {
             const connect_status = document.getElementById("connect_status");
-            connect_status ? connect_status.innerText = url : null;
+            connect_status ? connect_status.innerText = " " + url : null;
             localStorage.setItem("backendUrl", url);
             window.backendUrl = url;
             return true;

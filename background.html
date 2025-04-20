@@ -197,7 +197,7 @@
             imageFeed.onload = () => {
                 imageFeed.classList.remove("hidden");
                 gradient.classList.add("hidden");
-                errorImage = 0;
+                errorImage--;
             };
             imageFeed.onclick = () => {
                 imageFeed.src = backend_url + "/search/image?random=" + Math.random();

@@ -964,7 +964,7 @@ input.model:hover
     body:not(.white) .gradient{
         display: block;
     }
-    .settings .label:not([for="systemPrompt"]), form .label {
+    form .label {
         min-width: 200px;
     }
 }
@@ -990,6 +990,7 @@ input.model:hover
     width: 100%;
     display: flex;
     flex-direction: column;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 4px 0;
     margin-top: auto;
@@ -1020,6 +1021,7 @@ input.model:hover
     color: var(--colour-3);
     font-weight: 500;
     text-decoration: none;
+    text-align: left;
 }
 
 .sidebar .top {
@@ -1175,7 +1177,7 @@ ul {
     display: flex;
     padding: 15px;
     flex-direction: column;
-    height: 100%;
+    flex: 1;
 }
 
 /* style for hljs copy */
@@ -1471,7 +1473,7 @@ form textarea {
     font-size: 14px;
 }
 
-.hidden, input.hidden, .chat-container.hidden {
+.hidden, i.hidden, input.hidden, .chat-container.hidden {
     display: none;
 }
 

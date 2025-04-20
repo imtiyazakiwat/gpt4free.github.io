@@ -221,6 +221,11 @@
                     <i class="fa-solid fa-pencil"></i>
                     <a href="" onclick="return false;">Export Settings</a>
                 </button>
+                <button onclick="this.querySelector('.fa-spin').classList.remove('hidden'); translateAll().then(()=>{window.location.reload()}).catch(()=>{this.querySelector('.fa-spin').classList.add('hidden')})">
+                    <i class="fa-solid fa-language"></i>
+                    <a href="" onclick="return false;">Translate UI</a>
+                    <i class="fas fa-spinner fa-spin hidden"></i>
+                </button>
                 <button id="showLog">
                     <i class="fa-solid fa-terminal"></i>
                     <a href="" onclick="return false;">Show log</a>
@@ -305,12 +310,12 @@
                         <div class="send-buttons">
                             <button id="addButton">
                                 <i class="fa-solid fa-square-plus"></i>
-                                Add
+                                <span>Add</span>
                             </button>
                             <button id="sendButton">
                                 <i class="fa-regular fa-paper-plane"></i>
                                 <a href="" id="download" class="hidden"></a>
-                                Send
+                                <span>Send</span>
                             </button>
                         </div>
                     </div>

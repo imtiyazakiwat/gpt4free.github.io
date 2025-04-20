@@ -1483,7 +1483,7 @@ const load_conversation = async (conversation, scroll=true) => {
         let provider = provider_link ? `
             <div class="provider" data-provider="${item.provider.name}">
                 ${provider_link}
-                ${item.provider.model ? ' with ' + item.provider.model : ''}
+                ${item.provider.model ? ' ' + translate('with') + ' ' + item.provider.model : ''}
             </div>
         ` : "";
         let synthesize_params = {text: buffer}
@@ -1536,17 +1536,19 @@ const load_conversation = async (conversation, scroll=true) => {
 
         if (actions.includes("variant")) {
             add_buttons.push(`<button class="regenerate_button">
-                <span>Regenerate</span>
+                <span>${translate('Regenerate')}</span>
                 <i class="fa-solid fa-rotate"></i>
             </button>`);
         }
         if (actions.includes("continue")) {
             if (messages.length >= i - 1) {
                 add_buttons.push(`<button class="continue_button">
-                    <span>Continue</span>
+                    <span>${translate('Continue')}</span>
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </button>`);
             }
+        } else {
+            translate('Continue');
         }
 
         countTokensEnabled = appStorage.getItem("countTokens") != "false";
@@ -2039,7 +2041,7 @@ const load_settings_storage = async () => {
 }
 
 const say_hello = async () => {
-    tokens = [`Hello`, `!`, ` How`,` can`, ` I`,` assist`,` you`,` today`,`?`]
+    tokens = translate(`Hello! How can I assist you today?`).split(" ").map((token) => token + " ");
 
     chatBody.innerHTML += `
         <div class="message">

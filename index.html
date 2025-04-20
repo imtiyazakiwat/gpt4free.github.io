@@ -206,14 +206,18 @@
             import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
 
             (async function() {
-                if (!window.backendUrl || !await checkUrl(window.backendUrl)) {
+                if (!window.backendUrl || !await checkUrl(window.backendUrl) || true) {
                     for (const url of window.checkUrls) {
                         await checkUrl(url);
                     }
                 }
                 if (!localStorage.getItem(window.translationKey)) {
-                    if (await translateAll()) {
-                        window.location.reload();
+                    try {
+                        if (await translateAll()) {
+                            window.location.reload();
+                        }
+                    } catch (e) {
+                        console.debug(e);
                     }
                 }
             })();
