@@ -3,12 +3,12 @@
     "short_name": "G4F",
     "icons": [
         {
-            "src": "/static/img/android-chrome-192x192.png",
+            "src": "/dist/img/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/static/img/android-chrome-512x512.png",
+            "src": "/dist/img/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
@@ -18,7 +18,7 @@
     "display": "standalone",
     "scope": "/",
     "share_target": {
-        "action": "/chat/share",
+        "action": "/chat/",
         "method": "GET",
         "enctype": "application/x-www-form-urlencoded",
         "params": {
