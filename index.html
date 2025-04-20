@@ -184,7 +184,7 @@
         </div>
 
         <div class="connected">
-            <p><strong>Connected to: </strong><span id="connect_status">...</span></p>
+            <p><strong>Connected to:</strong><span> </span><span id="connect_status">...</span></p>
         </div>
 
         <!-- Input and Button -->
@@ -205,10 +205,8 @@
             import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
 
             (async function() {
-                if (!window.backendUrl || !await checkUrl(window.backendUrl) || true) {
-                    for (const url of window.checkUrls) {
-                        await checkUrl(url);
-                    }
+                for (const url of window.checkUrls) {
+                    await checkUrl(url);
                 }
                 if (!localStorage.getItem(window.translationKey)) {
                     try {

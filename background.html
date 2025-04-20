@@ -96,8 +96,13 @@
     <!-- Gradient Background Circle -->
     <div class="gradient"></div>
     <script>
+        (async function() {
+            for (const url of window.checkUrls) {
+                await checkUrl(url);
+            }
+        })();
         (async () => {
-            const videoUrl = window.backendUrl + "/search/video?skip=";
+            const videoUrl = "/search/video?skip=";
             const url = "https://image.pollinations.ai/feed";
             const imageFeed = document.getElementById("image-feed");
             const videoFeed = document.getElementById("video-feed");
@@ -120,15 +125,15 @@
                     gradient.classList.remove("hidden");
                     return;
                 }
-                videoFeed.src = videoUrl + skipVideo;
+                videoFeed.src = window.backendUrl + videoUrl + skipVideo;
                 skipVideo++;
             };
             videoFeed.onended = () => {
-                videoFeed.src = videoUrl + skipVideo;
+                videoFeed.src = window.backendUrl + videoUrl + skipVideo;
                 skipVideo++;
             };
             videoFeed.onclick = () => {
-                videoFeed.src = videoUrl + skipVideo;
+                videoFeed.src = window.backendUrl + videoUrl + skipVideo;
                 skipVideo++;
             };
             videoFeed.src = videoUrl;
