@@ -2400,7 +2400,7 @@ async function on_api() {
             <option value="Grok">Grok Provider</option>
             <option value="OpenaiChat">OpenAI Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
-            <option value="LMArenaProvider">LM Arena</option>
+            <option value="Cloudflare">Cloudflare</option>
             <option value="Gemini">Gemini Provider</option>
             <option value="HuggingFace">HuggingFace</option>
             <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
