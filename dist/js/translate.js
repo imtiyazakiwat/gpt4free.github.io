@@ -1,6 +1,6 @@
 window.translationKey = "translations" + document.location.pathname;
 window.translations = JSON.parse(localStorage.getItem(window.translationKey) || "{}");
-function translateElements(elements = null) {
+window.translateElements = function (elements = null) {
     elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label, i");
     elements.forEach(function (element) {
         element.innerText = window.translate(element.innerText);
@@ -15,7 +15,7 @@ function translateElements(elements = null) {
         }
     });
 }
-window.addEventListener('DOMContentLoaded', async function() {
+window.addEventListener('load', async function() {
     translateElements();
 });
 let newTranslations = [];
