@@ -58,6 +58,7 @@ let reloadConversation = true;
 let privateConversation = null;
 let suggestions = null;
 let lastUpdated = null;
+let stopRecognition = ()=>{};
 
 userInput.addEventListener("blur", () => {
     document.documentElement.scrollTop = 0;
@@ -2366,15 +2367,15 @@ async function on_api() {
         if (prompt_lock) return;
         prompt_lock = true;
         setTimeout(()=>prompt_lock=false, 3000);
-        stop_recognition();
+        stopRecognition();
         await handle_ask();
     });
     addButton.addEventListener(`click`, async () => {
-        stop_recognition();
+        stopRecognition();
         await handle_ask(false);
     });
     userInput.addEventListener(`click`, async () => {
-        stop_recognition();
+        stopRecognition();
     });
 
     let provider_options = [];
@@ -3162,7 +3163,6 @@ function get_navigator_language() {
 }
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let stop_recognition = ()=>{};
 if (SpeechRecognition) {
     const mircoIcon = microLabel.querySelector("i");
     mircoIcon.classList.add("fa-microphone");
@@ -3214,7 +3214,7 @@ if (SpeechRecognition) {
         }
     };
 
-    stop_recognition = ()=>{
+    stopRecognition = ()=>{
         if (microLabel.classList.contains("recognition")) {
             microLabel.classList.remove("recognition");
             recognition.stop();
@@ -3226,7 +3226,7 @@ if (SpeechRecognition) {
     }
 
     microLabel.addEventListener("click", (e) => {
-        if (!stop_recognition()) {
+        if (!stopRecognition()) {
             microLabel.classList.add("recognition");
             const lang = document.getElementById("recognition-language")?.value;
             recognition.lang = lang || get_navigator_language();
