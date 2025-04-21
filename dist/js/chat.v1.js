@@ -38,6 +38,15 @@ const translationSnipptes = [
     "No content found", "Files are loaded successfully",
     "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)"];
 
+modelTags = {
+    image: "🖼️ Image Generation",
+    vision: "👓 Image Upload",
+    audio: "🎧 Audio Generation",
+    video: "🎥 Video Generation"
+}
+
+translationSnipptes.push.apply(translationSnipptes, Object.entries(modelTags));
+
 document.addEventListener("DOMContentLoaded", (event) => {
     translationSnipptes.forEach((text) => window.translate(text));
 });
@@ -2400,20 +2409,9 @@ const load_provider_option = (input, provider_name) => {
     }
 };
 
-model_tags = {
-    image: "🖼️ Image Generation",
-    vision: "👓 Image Upload",
-    audio: "🎧 Audio Generation",
-    video: "🎥 Video Generation"
-}
-
-for (let [name, text] of Object.entries(model_tags)) {
-    model_tags[name] = window.translate(text);
-}
-
-function get_model_tags(model, add_vision = true) {
+function get_modelTags(model, add_vision = true) {
     const parts = []
-    for (let [name, text] of Object.entries(model_tags)) {
+    for (let [name, text] of Object.entries(modelTags)) {
         if (name != "vision" || add_vision) {
             parts.push(model[name] ? ` (${text})` : "")
         }
@@ -2429,7 +2427,7 @@ function load_providers(providers, login_urls, provider_options) {
         option.value = provider.name;
         option.dataset.label = provider.label;
         option.text = provider.label
-            + get_model_tags(provider)
+            + get_modelTags(provider)
             + (provider.nodriver ? " (Browser)" : "")
             + (provider.hf_space ? " (HuggingSpace)" : "")
             + (!provider.nodriver && provider.auth ? " (Auth)" : "");
@@ -2527,7 +2525,7 @@ async function on_api() {
     models.forEach((model) => {
         let option = document.createElement("option");
         option.value = model.name;
-        option.text = model.name + get_model_tags(model);
+        option.text = model.name + get_modelTags(model);
         option.dataset.providers = model.providers.join(" ");
         modelSelect.appendChild(option);
         is_demo = model.demo;
@@ -3077,11 +3075,11 @@ function load_fallback_models() {
     modelProvider.name = `model[Live]`;
     fetch("https://text.pollinations.ai/models").then(async (response) => {
         models = await response.json();
-        modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_model_tags(model, false)}</option>`).join("");
+        modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_modelTags(model, false)}</option>`).join("");
         ["flux", "turbo"].forEach((model) => {
             let option = document.createElement("option");
             option.value = model;
-            option.text = `${model} (${model_tags.image})`;
+            option.text = `${model} (${modelTags.image})`;
             modelProvider.appendChild(option);
         });
     });
@@ -3129,7 +3127,7 @@ async function load_provider_models(provider=null) {
             let option = document.createElement('option');
             option.value = model.model;
             option.dataset.label = model.model;
-            option.text = model.model + (model.count > 1 ? ` (${model.count}+)` : "") + get_model_tags(model);
+            option.text = model.model + (model.count > 1 ? ` (${model.count}+)` : "") + get_modelTags(model);
 
             if (model.task) {
                 option.text += ` (${model.task})`;
