@@ -13,19 +13,28 @@ if (["https:", "http:"].includes(window.location.protocol)) {
     window.checkUrls.push(window.location.origin);
 }
 async function checkUrl(url) {
-    fetch(`${url}/backend-api/v2/version`).then((response) => {
-        if (response.ok) {
-            const connect_status = document.getElementById("connect_status");
-            connect_status ? connect_status.innerText = " " + url : null;
-            localStorage.setItem("backendUrl", url);
-            window.backendUrl = url;
-            return true;
-        }
-    }).catch((error) => {
-        console.error("Error checking URL: ", error);
-    });
+    let response;
+    try {
+        response = await fetch(`${url}/backend-api/v2/version`);
+    } catch (error) {
+        console.debug("Error check url: ", error);
+        return false;
+    }
+    if (response.ok) {
+        const connect_status = document.getElementById("connect_status");
+        connect_status ? connect_status.innerText = url : null;
+        localStorage.setItem("backendUrl", url);
+        window.backendUrl = url;
+        return true;
+    }
+    return false;
 }
 window.backendUrl = localStorage.getItem('backendUrl') || "";
+window.connectBackend = async () => {
+    for (const url of window.checkUrls) {
+        await checkUrl(url);
+    }
+};
 
 window.translationKey = "translations" + document.location.pathname;
 window.translations = JSON.parse(localStorage.getItem(window.translationKey) || "{}");
@@ -45,6 +54,7 @@ window.translateElements = function (elements = null) {
     });
 }
 document.addEventListener("DOMContentLoaded", (event) => {
+    connectBackend()
     translateElements();
 });
 let newTranslations = [];

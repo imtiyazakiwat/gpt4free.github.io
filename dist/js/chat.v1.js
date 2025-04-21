@@ -2532,10 +2532,6 @@ async function on_api() {
     });
     let login_urls;
     if (is_demo) {
-        if (!localStorage.getItem("user")) {
-            location.href = "/";
-            return;
-        }
         providerSelect.innerHTML = `
             <option value="" selected="selected">Demo Mode</option>
             <option value="ARTA">ARTA Provider</option>

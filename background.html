@@ -86,8 +86,7 @@
         }
     </style>
     <link rel="stylesheet" href="dist/css/all.min.css">
-    <script>window.backendUrl = ""; window.checkUrls = [];</script>
-    <script src="dist/js/framework.js" async></script>
+    <script src="dist/js/framework.js"></script>
 </head>
 <body>
     <img id="image-feed" class="hidden" alt="Image Feed">
@@ -96,11 +95,6 @@
     <!-- Gradient Background Circle -->
     <div class="gradient"></div>
     <script>
-        (async function() {
-            for (const url of window.checkUrls) {
-                await checkUrl(url);
-            }
-        })();
         (async () => {
             const videoUrl = "/search/video?skip=";
             const url = "https://image.pollinations.ai/feed";
