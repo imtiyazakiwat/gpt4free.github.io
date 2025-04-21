@@ -49,12 +49,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 let newTranslations = [];
 window.translate = (text) => {
-    const endWithSpace = text.endsWith(" ");
-    strip_text = text.trim();
-    if (strip_text in window.translations && window.translations[strip_text]) {
-        return window.translations[strip_text] + (endWithSpace ? " " : "");
+    if (text) {
+        const endWithSpace = text.endsWith(" ");
+        strip_text = text.trim();
+        if (strip_text in window.translations && window.translations[strip_text]) {
+            return window.translations[strip_text] + (endWithSpace ? " " : "");
+        }
+        strip_text ? newTranslations.push(strip_text) : null;
     }
-    strip_text ? newTranslations.push(strip_text) : null;
     return text;
 };
 window.translateAll = async () =>{
