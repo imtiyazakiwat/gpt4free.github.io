@@ -55,7 +55,7 @@ window.translate = (text) => {
         if (strip_text in window.translations && window.translations[strip_text]) {
             return window.translations[strip_text] + (endWithSpace ? " " : "");
         }
-        strip_text ? newTranslations.push(strip_text) : null;
+        strip_text && !newTranslations.includes(strip_text) ? newTranslations.push(strip_text) : null;
     }
     return text;
 };

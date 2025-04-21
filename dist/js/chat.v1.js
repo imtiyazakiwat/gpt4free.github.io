@@ -45,7 +45,7 @@ modelTags = {
     video: "🎥 Video Generation"
 }
 
-translationSnipptes.push.apply(translationSnipptes, Object.entries(modelTags));
+translationSnipptes.push.apply(translationSnipptes, Object.values(modelTags));
 
 document.addEventListener("DOMContentLoaded", (event) => {
     translationSnipptes.forEach((text) => window.translate(text));
