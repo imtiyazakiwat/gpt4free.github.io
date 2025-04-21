@@ -208,6 +208,8 @@
                 for (const url of window.checkUrls) {
                     await checkUrl(url);
                 }
+            })();
+            (async function() {
                 if (!localStorage.getItem(window.translationKey)) {
                     try {
                         if (await translateAll()) {

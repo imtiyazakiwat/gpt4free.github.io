@@ -74,13 +74,16 @@ window.translateAll = async () =>{
     const response = await fetch(live_url);
     if (response.status !== 200) {
         const fallback_url = `${window.backendUrl}/backend-api/v2/create?prompt=${encodeURI(prompt)}&filter_markdown=true&cache=true`;
-        const response = await fetch(live_url);
+        const response = await fetch(fallback_url);
         if (response.status !== 200) {
             console.error("Error on translate: ", response.statusText);
             return;
         }
     }
     const translations = await response.json();
+    if (translations[navigator.language]) {
+        translations = translations[navigator.language];
+    }
     localStorage.setItem(window.translationKey, JSON.stringify(translations || allTranslations));
     return allTranslations;
 }
