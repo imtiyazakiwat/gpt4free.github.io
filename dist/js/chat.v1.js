@@ -104,6 +104,7 @@ if (window.markdownit) {
             .replaceAll('&quot;&gt;&lt;/video&gt;', '"></video>')
             .replaceAll('&lt;audio controls src=&quot;', '<audio controls src="')
             .replaceAll('&quot;&gt;&lt;/audio&gt;', '"></audio>')
+            .replaceAll('&lt;iframe src=&quot;', '<iframe frameborder="0" height="400" width="400" src="')
             .replaceAll('&lt;iframe type=&quot;text/html&quot; src=&quot;', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
             .replaceAll('&quot;&gt;&lt;/iframe&gt;', `?enablejsapi=1"></iframe>`)
             .replaceAll('src="/', `src="${window.backendUrl}/`)
@@ -576,7 +577,7 @@ const handle_ask = async (do_ask_gpt = true, message = null) => {
                 el.dataset.model
             ));
         } else {
-            await ask_gpt(message_id);
+            await ask_gpt(message_id, -1, false, null, null, message);
         }
     } else {
         await safe_load_conversation(window.conversation_id, true);
@@ -986,7 +987,7 @@ const requestWakeLock = async () => {
     }
 };
 
-async function play_last_message(scroll = true) {
+async function play_last_message(scroll = true, response = null) {
     const last_message = Array.from(document.querySelectorAll(".message")).at(-1);
     const last_media = last_message.querySelector("audio, iframe");
     if (last_media) {
@@ -1006,12 +1007,15 @@ async function play_last_message(scroll = true) {
                 });
             }
         } else {
+            if (response) {
+                last_media.src = URL.createObjectURL(await response.blob());
+            }
             last_media.play();
         }
     }
 }
 
-const ask_gpt = async (message_id, message_index = -1, regenerate = false, provider = null, model = null, action = null) => {
+const ask_gpt = async (message_id, message_index = -1, regenerate = false, provider = null, model = null, action = null, message = null) => {
     if (!model && !provider) {
         model = get_selected_model()?.value || null;
         provider = providerSelect.options[providerSelect.selectedIndex]?.value;
@@ -1170,6 +1174,76 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         await register_message_buttons();
         await load_conversations();
         regenerate_button.classList.remove("regenerate-hidden");
+    }
+    if (provider == "Live") {
+        async function generate_text(prompt, model) {
+            const text_url = `https://text.pollinations.ai/${encodeURI(prompt)}?model=${model}`;
+            await fetch(text_url)
+                .then(async (response) => {
+                    if (!response.ok) {
+                        return;
+                    }
+                    mime_type = response.headers.get("Content-Type");
+                    if (mime_type && mime_type.startsWith("text/")) {
+                        content = await response.text();
+                    } else if (mime_type && mime_type.startsWith("audio/")) {
+                        content = `<audio controls src="${text_url}"></audio>`
+                    } else {
+                        content = `<iframe src="${text_url}"></iframe>`;
+                    }
+                    await add_message(
+                        window.conversation_id,
+                        "assistant",
+                        content,
+                        null,
+                        message_index,
+                    );
+                    await load_conversation(await get_conversation(conversation_id));
+                    stop_generating.classList.add("stop_generating-hidden");
+                    play_last_message(scroll, response);
+                    load_conversations();
+                    hide_sidebar(true);                
+                })
+                .catch((error) => {
+                    console.error("Error on generate text:", error);
+                });
+            return;
+        }
+        async function generate_image(prompt, model) {
+            let seed = Math.floor(Date.now() / 1000);
+            seed = `model=${model}&seed=${seed}&`;
+            if (prompt == "hello") {
+                seed = "";
+            }
+            const image = `https://image.pollinations.ai/prompt/${encodeURI(prompt)}?${seed}nologo=true`;
+            await fetch(image)
+                .then(async (response) => {
+                    if (!response.ok) {
+                        return;
+                    }
+                    await add_message(
+                        window.conversation_id,
+                        "assistant",
+                        `![${encodeURI(prompt).replaceAll("%20", " ")}](${image})`,
+                        null,
+                        message_index,
+                    );
+                    await load_conversation(await get_conversation(conversation_id));
+                    stop_generating.classList.add("stop_generating-hidden");
+                    load_conversations();
+                    hide_sidebar(true);                
+                })
+                .catch((error) => {
+                    console.error("Error on generate image:", error);
+                });
+        }
+        if (!message) {
+            message = messages[messages.length-1].content;
+        }
+        if (["flux", "turbo"].includes(model)) {
+            return generate_image(message, model);
+        }
+        return generate_text(message, model);
     }
     try {
         let api_key;
@@ -1511,7 +1585,7 @@ const load_conversation = async (conversation, scroll=true) => {
         // Find buttons to add
         actions = ["variant"]
         // Add continue button if possible
-        if (item.role == "assistant") {
+        if (item.role == "assistant" && !Array.isArray(buffer)) {
             let reason = "stop";
             // Read finish reason from conversation
             if (item.finish && item.finish.reason) {
@@ -2333,14 +2407,80 @@ for (let [name, text] of Object.entries(model_tags)) {
     model_tags[name] = window.translate(text);
 }
 
-function get_model_tags(model) {
+function get_model_tags(model, add_vision = true) {
     const parts = []
     for (let [name, text] of Object.entries(model_tags)) {
-       parts.push(model[name] ? ` (${text})` : "")
+        if (name != "vision" || add_vision) {
+            parts.push(model[name] ? ` (${text})` : "")
+        }
     }
     return parts.join("");
 }
 
+function load_providers(providers, login_urls, provider_options) {
+    providers.sort((a, b) => a.label.localeCompare(b.label));
+    login_urls = {};
+    providers.forEach((provider) => {
+        let option = document.createElement("option");
+        option.value = provider.name;
+        option.dataset.label = provider.label;
+        option.text = provider.label
+            + get_model_tags(provider)
+            + (provider.nodriver ? " (Browser)" : "")
+            + (provider.hf_space ? " (HuggingSpace)" : "")
+            + (!provider.nodriver && provider.auth ? " (Auth)" : "");
+        if (provider.parent)
+            option.dataset.parent = provider.parent;
+        providerSelect.appendChild(option);
+
+        if (provider.parent) {
+            if (!login_urls[provider.parent]) {
+                login_urls[provider.parent] = [provider.label, provider.login_url, [provider.name], provider.auth];
+            } else {
+                login_urls[provider.parent][2].push(provider.name);
+            }
+        } else if (provider.login_url) {
+            if (!login_urls[provider.name]) {
+                login_urls[provider.name] = [provider.label, provider.login_url, [provider.name], provider.auth];
+            } else {
+                login_urls[provider.name][0] = provider.label;
+                login_urls[provider.name][1] = provider.login_url;
+            }
+        }
+    });
+
+    let providersContainer = document.createElement("div");
+    providersContainer.classList.add("field", "collapsible");
+    providersContainer.innerHTML = `
+        <div class="collapsible-header">
+            <span class="label">${window.translate('Providers (Enable/Disable)')}</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="collapsible-content hidden"></div>
+    `;
+    settings.querySelector(".paper").appendChild(providersContainer);
+
+    providers.forEach((provider) => {
+        if (!provider.parent) {
+            let option = document.createElement("div");
+            option.classList.add("provider-item");
+            let api_key = appStorage.getItem(`${provider.name}-api_key`);
+            option.innerHTML = `
+                <span class="label">Enable ${provider.label}</span>
+                <input id="Provider${provider.name}" type="checkbox" name="Provider${provider.name}" value="${provider.name}" class="provider" ${!provider.auth || api_key ? 'checked="checked"' : ''}/>
+                <label for="Provider${provider.name}" class="toogle" title="Remove provider from dropdown"></label>
+            `;
+            option.querySelector("input").addEventListener("change", (event) => load_provider_option(event.target, provider.name));
+            providersContainer.querySelector(".collapsible-content").appendChild(option);
+            provider_options[provider.name] = option;
+        }
+    });
+
+    providersContainer.querySelector(".collapsible-header").addEventListener('click', (e) => {
+        providersContainer.querySelector(".collapsible-content").classList.toggle('hidden');
+        providersContainer.querySelector(".collapsible-header").classList.toggle('active');
+    });
+}
 async function on_api() {
     load_version();
     let prompt_lock = false;
@@ -2401,6 +2541,7 @@ async function on_api() {
             <option value="Grok">Grok Provider</option>
             <option value="OpenaiChat">OpenAI Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
+            <option value="Live">Pollinations AI (live)</option>
             <option value="Cloudflare">Cloudflare</option>
             <option value="CopilotAccount">Microsoft Copilot</option>
             <option value="Gemini">Gemini Provider</option>
@@ -2423,68 +2564,10 @@ async function on_api() {
             "HuggingSpace": ["HuggingSpace", "", []],
         };
     } else {
-        providers = await api("providers")
-        providers.sort((a, b) => a.label.localeCompare(b.label));
-        login_urls = {};
-        providers.forEach((provider) => {
-            let option = document.createElement("option");
-            option.value = provider.name;
-            option.dataset.label = provider.label;
-            option.text = provider.label
-                + get_model_tags(provider)
-                + (provider.nodriver ? " (Browser)" : "")
-                + (provider.hf_space ? " (HuggingSpace)" : "")
-                + (!provider.nodriver && provider.auth ? " (Auth)" : "");
-            if (provider.parent)
-                option.dataset.parent = provider.parent;
-            providerSelect.appendChild(option);
 
-            if (provider.parent) {
-                if (!login_urls[provider.parent]) {
-                    login_urls[provider.parent] = [provider.label, provider.login_url, [provider.name], provider.auth];
-                } else {
-                    login_urls[provider.parent][2].push(provider.name);
-                }
-            } else if (provider.login_url) {
-                if (!login_urls[provider.name]) {
-                    login_urls[provider.name] = [provider.label, provider.login_url, [provider.name], provider.auth];
-                } else {
-                    login_urls[provider.name][0] = provider.label;
-                    login_urls[provider.name][1] = provider.login_url;
-                }
-            }
-        });
-
-        let providersContainer = document.createElement("div");
-        providersContainer.classList.add("field", "collapsible");
-        providersContainer.innerHTML = `
-            <div class="collapsible-header">
-                <span class="label">${window.translate('Providers (Enable/Disable)')}</span>
-                <i class="fa-solid fa-chevron-down"></i>
-            </div>
-            <div class="collapsible-content hidden"></div>
-        `;
-        settings.querySelector(".paper").appendChild(providersContainer);
-
-        providers.forEach((provider) => {
-            if (!provider.parent) {
-                let option = document.createElement("div");
-                option.classList.add("provider-item");
-                let api_key = appStorage.getItem(`${provider.name}-api_key`);
-                option.innerHTML = `
-                    <span class="label">Enable ${provider.label}</span>
-                    <input id="Provider${provider.name}" type="checkbox" name="Provider${provider.name}" value="${provider.name}" class="provider" ${!provider.auth || api_key ? 'checked="checked"' : ''}/>
-                    <label for="Provider${provider.name}" class="toogle" title="Remove provider from dropdown"></label>
-                `;
-                option.querySelector("input").addEventListener("change", (event) => load_provider_option(event.target, provider.name));
-                providersContainer.querySelector(".collapsible-content").appendChild(option);
-                provider_options[provider.name] = option;
-            }
-        });
-
-        providersContainer.querySelector(".collapsible-header").addEventListener('click', (e) => {
-            providersContainer.querySelector(".collapsible-content").classList.toggle('hidden');
-            providersContainer.querySelector(".collapsible-header").classList.toggle('active');
+        providers = api("providers").then((providers) => load_providers(providers, login_urls, provider_options)).catch(() => {
+            providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
+            load_fallback_models();
         });
     }
 
@@ -2984,9 +3067,31 @@ function get_api_key_by_provider(provider) {
     return api_key;
 }
 
+function load_fallback_models() {
+    modelSelect.classList.add("hidden");
+    modelProvider.classList.remove("hidden");
+    modelProvider.name = `model[Live]`;
+    fetch("https://text.pollinations.ai/models").then(async (response) => {
+        models = await response.json();
+        models.forEach((model) => {
+            modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_model_tags(model, false)}</option>`).join("");
+            ["flux", "turbo"].forEach((model) => {
+                let option = document.createElement("option");
+                option.value = model;
+                option.text = `${model} (${model_tags.image})`;
+                modelSelect.appendChild(option);
+            });
+        });
+    });
+}
+
 async function load_provider_models(provider=null) {
     if (!provider) {
         provider = providerSelect.value;
+    }
+    if (provider == "Live") {
+        await load_fallback_models();
+        return;
     }
     if (!custom_model.value) {
         custom_model.classList.add("hidden");
@@ -3045,8 +3150,6 @@ async function load_provider_models(provider=null) {
 providerSelect.addEventListener("change", () => {
     load_provider_models()
 });
-modelSelect.addEventListener("change", () => userInput.focus());
-modelProvider.addEventListener("change", () =>  userInput.focus());
 custom_model.addEventListener("change", () => {
     if (!custom_model.value) {
         load_provider_models();

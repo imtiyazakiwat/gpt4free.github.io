@@ -71,10 +71,15 @@ window.translateAll = async () =>{
     const json_translations = "\n\n```json\n" + JSON.stringify(allTranslations, null, 4) + "\n```";
     const json_language = "`" + navigator.language + "`";
     const prompt = `Translate the following text snippets in a JSON object to ${json_language} (iso code): ${json_translations}`;
-    const response = await fetch(`${window.backendUrl}/backend-api/v2/create?prompt=${encodeURI(prompt)}&filter_markdown=true&provider=PollinationsAI&cache=true`);
+    const live_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?json=true`;
+    const response = await fetch(live_url);
     if (response.status !== 200) {
-        console.error("Error: ", response.statusText);
-        return;
+        const fallback_url = `${window.backendUrl}/backend-api/v2/create?prompt=${encodeURI(prompt)}&filter_markdown=true&cache=true`;
+        const response = await fetch(live_url);
+        if (response.status !== 200) {
+            console.error("Error on translate: ", response.statusText);
+            return;
+        }
     }
     const translations = await response.json();
     localStorage.setItem(window.translationKey, JSON.stringify(translations || allTranslations));
