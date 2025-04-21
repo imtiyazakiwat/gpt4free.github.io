@@ -44,7 +44,7 @@ window.translateElements = function (elements = null) {
         }
     });
 }
-window.addEventListener('load', async function() {
+document.addEventListener("DOMContentLoaded", (event) => {
     translateElements();
 });
 let newTranslations = [];

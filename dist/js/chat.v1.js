@@ -38,9 +38,9 @@ const translationSnipptes = [
     "No content found", "Files are loaded successfully",
     "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)"];
 
-(async () => {
+document.addEventListener("DOMContentLoaded", (event) => {
     translationSnipptes.forEach((text) => window.translate(text));
-})();
+});
 
 let provider_storage = {};
 let message_storage = {};
