@@ -30,13 +30,17 @@ const paperclip         = document.querySelector(".user-input .fa-paperclip");
 
 const optionElementsSelector = ".settings input, .settings textarea, .chat-body input, #model, #model2, #provider";
 
-translationSnipptes = [
+const translationSnipptes = [
     "with", "**An error occured:**", "Private Conversation", "New Conversation", "Regenerate", "Continue",
     "Hello! How can I assist you today?", "words", "chars", "tokens",
     "{0} Messages were imported", "{0} File(s) uploaded successfully",
     "{0} Conversations/Settings were imported successfully",
     "No content found", "Files are loaded successfully",
     "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)"];
+
+(async () => {
+    translationSnipptes.forEach((text) => window.translate(text));
+})();
 
 let provider_storage = {};
 let message_storage = {};
@@ -1224,7 +1228,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     await add_message(
                         window.conversation_id,
                         "assistant",
-                        `![${encodeURI(prompt).replaceAll("%20", " ")}](${image})`,
+                        `[![${prompt.replaceAll('\n', ' ')}](${image})](${image})`,
                         null,
                         message_index,
                     );
@@ -3073,14 +3077,12 @@ function load_fallback_models() {
     modelProvider.name = `model[Live]`;
     fetch("https://text.pollinations.ai/models").then(async (response) => {
         models = await response.json();
-        models.forEach((model) => {
-            modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_model_tags(model, false)}</option>`).join("");
-            ["flux", "turbo"].forEach((model) => {
-                let option = document.createElement("option");
-                option.value = model;
-                option.text = `${model} (${model_tags.image})`;
-                modelSelect.appendChild(option);
-            });
+        modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_model_tags(model, false)}</option>`).join("");
+        ["flux", "turbo"].forEach((model) => {
+            let option = document.createElement("option");
+            option.value = model;
+            option.text = `${model} (${model_tags.image})`;
+            modelProvider.appendChild(option);
         });
     });
 }

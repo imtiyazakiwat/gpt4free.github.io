@@ -13,8 +13,7 @@ if (["https:", "http:"].includes(window.location.protocol)) {
     window.checkUrls.push(window.location.origin);
 }
 async function checkUrl(url) {
-    try {
-        const response = await fetch(`${url}/backend-api/v2/version`);
+    fetch(`${url}/backend-api/v2/version`).then((response) => {
         if (response.ok) {
             const connect_status = document.getElementById("connect_status");
             connect_status ? connect_status.innerText = " " + url : null;
@@ -22,9 +21,9 @@ async function checkUrl(url) {
             window.backendUrl = url;
             return true;
         }
-    } catch (e) {
-        console.debug(e);
-    }
+    }).catch((error) => {
+        console.error("Error checking URL: ", error);
+    });
 }
 window.backendUrl = localStorage.getItem('backendUrl') || "";
 
@@ -51,11 +50,11 @@ window.addEventListener('load', async function() {
 let newTranslations = [];
 window.translate = (text) => {
     const endWithSpace = text.endsWith(" ");
-    text = text.trim();
-    if (text in window.translations && window.translations[text]) {
-        return window.translations[text] + (endWithSpace ? " " : "");
+    strip_text = text.trim();
+    if (strip_text in window.translations && window.translations[strip_text]) {
+        return window.translations[strip_text] + (endWithSpace ? " " : "");
     }
-    text ? newTranslations.push(text) : null;
+    strip_text ? newTranslations.push(strip_text) : null;
     return text;
 };
 window.translateAll = async () =>{
