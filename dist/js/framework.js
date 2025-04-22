@@ -41,7 +41,9 @@ window.translations = JSON.parse(localStorage.getItem(window.translationKey) || 
 window.translateElements = function (elements = null) {
     elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span:not(:has(a, i)), strong, a, div[data-translate], input, textarea, label:not(:has(span, a, i)), i, option[value='']");
     elements.forEach(function (element) {
-        element.innerText = window.translate(element.innerText);
+        if (element.textContent.trim()) {
+            element.textContent = window.translate(element.textContent);
+        }
         if (element.alt) {
             element.alt = window.translate(element.alt);
         }

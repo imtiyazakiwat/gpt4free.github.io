@@ -91,6 +91,7 @@
 <body>
     <img id="image-feed" class="hidden" alt="Image Feed">
     <video id="video-feed" class="hidden" alt="Video Feed" autoplay muted></video>
+    <video id="preload" class="hidden" alt="" autoplay muted></video>
 
     <!-- Gradient Background Circle -->
     <div class="gradient"></div>
@@ -100,6 +101,7 @@
             const url = "https://image.pollinations.ai/feed";
             const imageFeed = document.getElementById("image-feed");
             const videoFeed = document.getElementById("video-feed");
+            const preload = document.getElementById("preload");
             const gradient = document.querySelector(".gradient");
             const images = [];
             let es = null;
@@ -124,13 +126,15 @@
             };
             videoFeed.onended = () => {
                 videoFeed.src = window.backendUrl + videoUrl + skipVideo;
+                preload.src = window.backendUrl + videoUrl + (skipVideo + 1);
                 skipVideo++;
             };
             videoFeed.onclick = () => {
                 videoFeed.src = window.backendUrl + videoUrl + skipVideo;
                 skipVideo++;
             };
-            videoFeed.src = videoUrl;
+            videoFeed.src = window.backendUrl + videoUrl + skipVideo;
+            preload.src = window.backendUrl + videoUrl + (skipVideo + 1);
             function initES() {
                 if (es == null || es.readyState == EventSource.CLOSED) {
                     const eventSource = new EventSource(url);

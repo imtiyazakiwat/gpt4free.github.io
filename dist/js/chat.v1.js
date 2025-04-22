@@ -27,6 +27,8 @@ const log_storage       = document.querySelector(".log");
 const switchInput       = document.getElementById("switch");
 const searchButton      = document.getElementById("search");
 const paperclip         = document.querySelector(".user-input .fa-paperclip");
+const hide_systemPrompt = document.getElementById("hide-systemPrompt")
+const slide_systemPrompt_icon = document.querySelector(".slide-header i");
 
 const optionElementsSelector = ".settings input, .settings textarea, .chat-body input, #model, #model2, #provider";
 
@@ -37,6 +39,11 @@ const translationSnipptes = [
     "{0} Conversations/Settings were imported successfully",
     "No content found", "Files are loaded successfully",
     "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)", "Get API key"];
+
+let login_urls_storage = {
+    "HuggingFace": ["HuggingFace", "https://huggingface.co/settings/tokens", ["HuggingFaceMedia"]],
+    "HuggingSpace": ["HuggingSpace", "", []],
+};
 
 modelTags = {
     image: "🖼️ Image Generation",
@@ -1440,7 +1447,7 @@ const delete_conversation = async (conversation_id) => {
         if (Array.isArray(message.content)) {
             for (const item of message.content) {
                 if ("bucket_id" in item) {
-                    const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURI(item.bucket_id)}`;
+                    const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURIComponent(item.bucket_id)}`;
                     await fetch(delete_url, {
                         method: 'DELETE'
                     });
@@ -1449,14 +1456,12 @@ const delete_conversation = async (conversation_id) => {
         }
     }
     if (conversation.share) {
-        const url = `${window.backendUrl}/backend-api/v2/files/${conversation.id}`;
+        const url = `${window.backendUrl}/backend-api/v2/files/${encodeURIComponent(conversation.id)}`;
         await fetch(url, {
             method: 'DELETE'
         });
     }
     appStorage.removeItem(`conversation:${conversation_id}`);
-    const item = document.getElementById(`convo-${conversation_id}`);
-    item.remove();
 
     if (window.conversation_id == conversation_id) {
         await new_conversation();
@@ -2069,6 +2074,7 @@ function open_settings() {
     } else {
         settings.classList.add("hidden");
         chat.classList.remove("hidden");
+        history.back();
     }
     log_storage.classList.add("hidden");
 }
@@ -2314,13 +2320,10 @@ window.addEventListener('load', async function() {
     }
     conversation = await response.json();
     if (conversation.id == window.conversation_id) {
-        await load_conversation(conversation);
         await save_conversation(conversation.id, conversation);
         await load_conversations();
     }
-    await safe_load_conversation(window.conversation_id, false);
-
-    translationsSnippets.forEach((snippet)=>this.window.translate(snippet));
+    await load_conversation(window.conversation_id);
 });
 
 let refreshOnHidden = true;
@@ -2359,6 +2362,7 @@ window.addEventListener('pywebviewready', async function() {
 });
 
 async function on_load() {
+    translationSnipptes.forEach((snippet)=>this.window.translate(snippet));
     count_input();
     if (window.location.hash == "#settings") {
         open_settings();
@@ -2371,7 +2375,6 @@ async function on_load() {
     } else {
         window.conversation_id = generateUUID();
     }
-    chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
     chatPrompt.value = document.getElementById("systemPrompt")?.value || "";
     let chat_params = new URLSearchParams(window.location.query);
     if (chat_params.get("prompt")) {
@@ -2434,9 +2437,8 @@ function get_modelTags(model, add_vision = true) {
     return parts.join("");
 }
 
-function load_providers(providers, login_urls, provider_options) {
+function load_providers(providers, provider_options) {
     providers.sort((a, b) => a.label.localeCompare(b.label));
-    login_urls = {};
     providers.forEach((provider) => {
         let option = document.createElement("option");
         option.value = provider.name;
@@ -2451,17 +2453,17 @@ function load_providers(providers, login_urls, provider_options) {
         providerSelect.appendChild(option);
 
         if (provider.parent) {
-            if (!login_urls[provider.parent]) {
-                login_urls[provider.parent] = [provider.label, provider.login_url, [provider.name], provider.auth];
+            if (!login_urls_storage[provider.parent]) {
+                login_urls_storage[provider.parent] = [provider.label, provider.login_url, [provider.name], provider.auth];
             } else {
-                login_urls[provider.parent][2].push(provider.name);
+                login_urls_storage[provider.parent][2].push(provider.name);
             }
         } else if (provider.login_url) {
-            if (!login_urls[provider.name]) {
-                login_urls[provider.name] = [provider.label, provider.login_url, [provider.name], provider.auth];
+            if (!login_urls_storage[provider.name]) {
+                login_urls_storage[provider.name] = [provider.label, provider.login_url, [provider.name], provider.auth];
             } else {
-                login_urls[provider.name][0] = provider.label;
-                login_urls[provider.name][1] = provider.login_url;
+                login_urls_storage[provider.name][0] = provider.label;
+                login_urls_storage[provider.name][1] = provider.login_url;
             }
         }
     });
@@ -2545,7 +2547,6 @@ async function on_api() {
         modelSelect.appendChild(option);
         is_demo = model.demo;
     });
-    let login_urls;
     if (is_demo) {
         providerSelect.innerHTML = `
             <option value="" selected="selected">Demo Mode</option>
@@ -2573,12 +2574,8 @@ async function on_api() {
                 option.remove();
             }
         });
-        login_urls = {
-            "HuggingFace": ["HuggingFace", "https://huggingface.co/settings/tokens", ["HuggingFaceMedia"]],
-            "HuggingSpace": ["HuggingSpace", "", []],
-        };
     } else {
-        providers = api("providers").then((providers) => load_providers(providers, login_urls, provider_options)).catch(() => {
+        providers = api("providers").then((providers) => load_providers(providers, provider_options)).catch(() => {
             providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
             load_fallback_models();
         });
@@ -2601,7 +2598,7 @@ async function on_api() {
     `;
     settings.querySelector(".paper").appendChild(providersListContainer);
 
-    for (let [name, [label, login_url, childs, auth]] of Object.entries(login_urls)) {
+    for (let [name, [label, login_url, childs, auth]] of Object.entries(login_urls_storage)) {
         if (!login_url && !is_demo) {
             continue;
         }
@@ -2634,23 +2631,19 @@ async function on_api() {
         ([provider_name, option]) => load_provider_option(option.querySelector("input"), provider_name)
     );
 
-    const hide_systemPrompt = document.getElementById("hide-systemPrompt")
-    const slide_systemPrompt_icon = document.querySelector(".slide-header i");
-    document.querySelector(".slide-header")?.addEventListener("click", () => {
-        const checked = slide_systemPrompt_icon.classList.contains("fa-angles-up");
-        chatPrompt.classList[checked ? "add": "remove"]("hidden");
+    const update_systemPrompt_icon = (checked) => {
         slide_systemPrompt_icon.classList[checked ? "remove": "add"]("fa-angles-up");
         slide_systemPrompt_icon.classList[checked ? "add": "remove"]("fa-angles-down");
-    });
-    if (hide_systemPrompt.checked) {
-        slide_systemPrompt_icon.click();
+        chatPrompt.classList[checked ? "add": "remove"]("hidden");
+    };
+    if (appStorage.getItem("hide_systemPrompt") == "true") {
+        update_systemPrompt_icon(true);
     }
+    slide_systemPrompt_icon.addEventListener("click", ()=>{
+        update_systemPrompt_icon(slide_systemPrompt_icon.classList.contains("fa-angles-up"));
+    });
     hide_systemPrompt.addEventListener('change', async (event) => {
-        if (event.target.checked) {
-            chatPrompt.classList.add("hidden");
-        } else {
-            chatPrompt.classList.remove("hidden");
-        }
+        update_systemPrompt_icon(event.target.checked);
     });
     const userInputHeight = document.getElementById("message-input-height");
     if (userInputHeight) {
