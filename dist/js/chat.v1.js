@@ -74,11 +74,13 @@ let lastUpdated = null;
 let stopRecognition = ()=>{};
 
 userInput.addEventListener("blur", () => {
-    document.documentElement.scrollTop = 0;
+    //document.documentElement.scrollTop = 0;
+    //document.querySelector(".container").style.maxHeight = window.screen.height + "px"
+    //document.querySelector(".container").style.maxHeight = window.innerHeight + "px"
 });
 
 userInput.addEventListener("focus", () => {
-    document.documentElement.scrollTop = document.documentElement.scrollHeight;
+    //document.documentElement.scrollTop = document.documentElement.scrollHeight;
 });
 
 appStorage = window.localStorage || {
