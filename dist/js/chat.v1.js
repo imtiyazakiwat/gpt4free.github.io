@@ -1201,7 +1201,11 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             });
     } else if (provider == "Live") {
         async function generate_text(prompt, model) {
-            const text_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}`;
+            let seed = regenerate ? Math.floor(Date.now() / 1000) : "";
+            if (prompt == "hello") {
+                seed = "";
+            }
+            const text_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}&seed=${seed}`;
             await fetch(text_url)
                 .then(async (response) => {
                     if (!response.ok) {
@@ -1229,6 +1233,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     hide_sidebar();                
                 })
                 .catch((error) => {
+                    stop_generating.classList.add("stop_generating-hidden");
                     console.error("Error on generate text:", error);
                 });
             return;
@@ -1259,6 +1264,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                 })
                 .catch((error) => {
                     console.error("Error on generate image:", error);
+                    stop_generating.classList.add("stop_generating-hidden");
                 });
         }
         if (!message) {
@@ -1376,7 +1382,7 @@ async function set_conversation_title(conversation_id, title) {
         appStorage.removeItem(`conversation:${conversation.id}`);
         title_ids_storage[conversation_id] = new_id;
         conversation.id = new_id;
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`#${conversation_id}`);
     }
     appStorage.setItem(
         `conversation:${conversation.id}`,
@@ -1464,7 +1470,7 @@ const set_conversation = async (conversation_id) => {
         conversation_id = title_ids_storage[conversation_id];
     }
     try {
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`#${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
@@ -1495,7 +1501,7 @@ const new_conversation = async (private = false) => {
 };
 
 function merge_messages(message1, message2) {
-    if (Array.isArray(message2)) {
+    if (Array.isArray(message2) || !message1) {
         return message2;
     }
     let newContent = message2;
@@ -1806,7 +1812,7 @@ async function add_conversation(conversation_id) {
         }));
     }
     try {
-        add_url_to_history(`/chat/#${conversation_id}`);
+        add_url_to_history(`#${conversation_id}`);
     } catch (e) {
         console.error(e);
     }
@@ -2051,7 +2057,7 @@ async function show_menu() {
     sidebar.classList.add("shown");
     sidebar_buttons.forEach((el)=>el.classList.add("rotated"))
     await hide_settings();
-    add_url_to_history("/chat/#menu");
+    add_url_to_history("#menu");
 }
 
 function open_settings() {
@@ -2059,7 +2065,7 @@ function open_settings() {
         chat.classList.add("hidden");
         sidebar.classList.remove("shown");
         settings.classList.remove("hidden");
-        add_url_to_history("/chat/#settings");
+        add_url_to_history("#settings");
     } else {
         settings.classList.add("hidden");
         chat.classList.remove("hidden");
