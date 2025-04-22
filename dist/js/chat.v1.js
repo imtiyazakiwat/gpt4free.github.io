@@ -36,7 +36,7 @@ const translationSnipptes = [
     "{0} Messages were imported", "{0} File(s) uploaded successfully",
     "{0} Conversations/Settings were imported successfully",
     "No content found", "Files are loaded successfully",
-    "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)"];
+    "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)", "Get API key"];
 
 modelTags = {
     image: "🖼️ Image Generation",
@@ -2556,7 +2556,6 @@ async function on_api() {
             "HuggingSpace": ["HuggingSpace", "", []],
         };
     } else {
-
         providers = api("providers").then((providers) => load_providers(providers, login_urls, provider_options)).catch(() => {
             providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
             load_fallback_models();
@@ -2591,7 +2590,7 @@ async function on_api() {
         providerBox.innerHTML = `
             <label for="${name}-api_key" class="label" title="">${label}:</label>
             <input type="text" id="${name}-api_key" name="${name}[api_key]" class="${childs}" ${placeholder} autocomplete="off"/>
-        ` + (login_url ? `<a href="${login_url}" target="_blank" title="Login to ${label}">Get API key</a>` : "");
+        ` + (login_url ? `<a href="${login_url}" target="_blank" title="Login to ${label}">${window.translate('Get API key')}</a>` : "");
         if (auth) {
             providerBox.querySelector("input").addEventListener("input", (event) => {
                 const input = document.getElementById(`Provider${name}`);
@@ -2636,9 +2635,6 @@ async function on_api() {
         if (userInputHeight.value) {
             userInput.style.maxHeight = `${userInputHeight.value}px`;
         }
-        userInputHeight.addEventListener('change', async () => {
-            userInput.style.maxHeight = `${userInputHeight.value}px`;
-        });
     }
     const darkMode = document.getElementById("darkMode");
     if (darkMode) {
