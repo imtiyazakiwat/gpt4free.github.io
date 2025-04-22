@@ -2331,7 +2331,7 @@ setInterval(async () => {
     if (!refreshOnHidden || !window.conversation_id) {
         return;
     }
-    const conversation = await get_conversation(window.conversation_id);
+    let conversation = await get_conversation(window.conversation_id);
     if (!conversation || !conversation.share) {
         return
     }
