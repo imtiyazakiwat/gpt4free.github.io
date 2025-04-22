@@ -75,8 +75,8 @@ let stopRecognition = ()=>{};
 
 userInput.addEventListener("blur", () => {
     //document.documentElement.scrollTop = 0;
-    //document.querySelector(".container").style.maxHeight = window.screen.height + "px"
-    //document.querySelector(".container").style.maxHeight = window.innerHeight + "px"
+    document.querySelector(".container").style.maxHeight = window.screen.height + "px"
+    document.querySelector(".container").style.maxHeight = window.innerHeight + "px"
 });
 
 userInput.addEventListener("focus", () => {

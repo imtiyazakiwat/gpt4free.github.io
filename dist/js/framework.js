@@ -30,8 +30,9 @@ async function checkUrl(url) {
     return false;
 }
 window.backendUrl = localStorage.getItem('backendUrl') || "";
-window.connectBackend = async () => {
-    for (const url of window.checkUrls) {
+window.connectToBackend = async () => {
+    let url;
+    while (url = window.checkUrls.pop()) {
         await checkUrl(url);
     }
 };
@@ -39,7 +40,7 @@ window.connectBackend = async () => {
 window.translationKey = "translations" + document.location.pathname;
 window.translations = JSON.parse(localStorage.getItem(window.translationKey) || "{}");
 window.translateElements = function (elements = null) {
-    elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label, i, option[value='']");
+    elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label:not(:has(span, a, i)), i, option[value='']");
     elements.forEach(function (element) {
         element.innerText = window.translate(element.innerText);
         if (element.alt) {
@@ -54,7 +55,7 @@ window.translateElements = function (elements = null) {
     });
 }
 document.addEventListener("DOMContentLoaded", (event) => {
-    connectBackend()
+    connectToBackend()
     translateElements();
 });
 let newTranslations = [];
