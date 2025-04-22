@@ -32,7 +32,7 @@ const optionElementsSelector = ".settings input, .settings textarea, .chat-body 
 
 const translationSnipptes = [
     "with", "**An error occured:**", "Private Conversation", "New Conversation", "Regenerate", "Continue",
-    "Hello! How can I assist you today?", "words", "chars", "tokens",
+    "Hello! How can I assist you today?", "words", "chars", "tokens", "{0} total tokens",
     "{0} Messages were imported", "{0} File(s) uploaded successfully",
     "{0} Conversations/Settings were imported successfully",
     "No content found", "Files are loaded successfully",
@@ -73,15 +73,8 @@ let suggestions = null;
 let lastUpdated = null;
 let stopRecognition = ()=>{};
 
-userInput.addEventListener("blur", () => {
-    //document.documentElement.scrollTop = 0;
-    document.querySelector(".container").style.maxHeight = window.screen.height + "px"
-    document.querySelector(".container").style.maxHeight = window.innerHeight + "px"
-});
-
-userInput.addEventListener("focus", () => {
-    //document.documentElement.scrollTop = document.documentElement.scrollHeight;
-});
+// Hotfix for mobile
+document.querySelector(".container").style.maxHeight = window.innerHeight + "px"
 
 appStorage = window.localStorage || {
     setItem: (key, value) => self[key] = value,
@@ -1703,18 +1696,16 @@ const load_conversation = async (conversation, scroll=true) => {
         chatBody.appendChild(suggestions_el);
         suggestions = null;
     } else if (countTokensEnabled && window.GPTTokenizer_cl100k_base) {
-        const has_media = messages.filter((item)=>Array.isArray(item.content)).length > 0;
-        if (!has_media) {
-            const filtered = prepare_messages(messages, null, true, false);
-            if (filtered.length > 0) {
-                last_model = last_model?.startsWith("gpt-3") ? "gpt-3.5-turbo" : "gpt-4"
-                let count_total = GPTTokenizer_cl100k_base?.encodeChat(filtered, last_model).length
-                if (count_total > 0) {
-                    const count_total_el = document.createElement("div");
-                    count_total_el.classList.add("count_total");
-                    count_total_el.innerText = `(${count_total} total tokens)`;
-                    chatBody.appendChild(count_total_el);
-                }
+        let filtered = prepare_messages(messages, null, true, false);
+        filtered.filter((item)=>!Array.isArray(item.content));
+        if (filtered.length > 0) {
+            last_model = last_model?.startsWith("gpt-3") ? "gpt-3.5-turbo" : "gpt-4"
+            let count_total = GPTTokenizer_cl100k_base?.encodeChat(filtered, last_model).length
+            if (count_total > 0) {
+                const count_total_el = document.createElement("div");
+                count_total_el.classList.add("count_total");
+                count_total_el.innerText = window.translate("{0} total tokens").replace("{0}", count_total);
+                chatBody.appendChild(count_total_el);
             }
         }
     }
@@ -2543,7 +2534,8 @@ async function on_api() {
             <option value="PollinationsAI">Pollinations AI</option>
             <option value="Live">Pollinations AI (live)</option>
             <option value="Cloudflare">Cloudflare</option>
-            <option value="CopilotAccount">Microsoft Copilot</option>
+            <option value="Copilot">Microsoft Copilot</option>
+            <option value="PerplexityLabs">Perplexity Labs</option>
             <option value="Gemini">Gemini Provider</option>
             <option value="HuggingFace">HuggingFace</option>
             <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>

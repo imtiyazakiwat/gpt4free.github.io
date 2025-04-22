@@ -885,6 +885,7 @@ input.model:hover
     color: var(--colour-3);
     outline: none;
     transition: max-height 0.15s ease-out;
+    width: 100%;
 }
 
 #systemPrompt:focus, #chatPrompt:focus {

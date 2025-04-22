@@ -17,7 +17,7 @@ async function checkUrl(url) {
     try {
         response = await fetch(`${url}/backend-api/v2/version`);
     } catch (error) {
-        console.debug("Error check url: ", error);
+        console.debug("Error check url: ", url);
         return false;
     }
     if (response.ok) {
@@ -31,8 +31,7 @@ async function checkUrl(url) {
 }
 window.backendUrl = localStorage.getItem('backendUrl') || "";
 window.connectToBackend = async () => {
-    let url;
-    while (url = window.checkUrls.pop()) {
+    for (const url of window.checkUrls) {
         await checkUrl(url);
     }
 };
@@ -40,7 +39,7 @@ window.connectToBackend = async () => {
 window.translationKey = "translations" + document.location.pathname;
 window.translations = JSON.parse(localStorage.getItem(window.translationKey) || "{}");
 window.translateElements = function (elements = null) {
-    elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span, strong, a, div[data-translate], input, textarea, label:not(:has(span, a, i)), i, option[value='']");
+    elements = elements || document.querySelectorAll("p:not(:has(span, a)), h1, h2, h3, h4, h5, h6, button:not(:has(span, a, i)), title, span:not(:has(a, i)), strong, a, div[data-translate], input, textarea, label:not(:has(span, a, i)), i, option[value='']");
     elements.forEach(function (element) {
         element.innerText = window.translate(element.innerText);
         if (element.alt) {
