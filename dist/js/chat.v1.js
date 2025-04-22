@@ -1183,9 +1183,25 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         await load_conversations();
         regenerate_button.classList.remove("regenerate-hidden");
     }
-    if (provider == "Live") {
+    if (provider == "Puter") {
+        puter.ai.chat(messages=messages, options={"model": model}, testMode=true)
+            .then(async (response) => {
+                await add_message(
+                    window.conversation_id,
+                    "assistant",
+                    response,
+                    null,
+                    message_index,
+                );
+                await load_conversation(await get_conversation(conversation_id));
+                stop_generating.classList.add("stop_generating-hidden");
+                play_last_message(scroll, response);
+                load_conversations();
+                hide_sidebar();             
+            });
+    } else if (provider == "Live") {
         async function generate_text(prompt, model) {
-            const text_url = `https://text.pollinations.ai/${encodeURI(prompt)}?model=${model}`;
+            const text_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}`;
             await fetch(text_url)
                 .then(async (response) => {
                     if (!response.ok) {
@@ -1210,7 +1226,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     stop_generating.classList.add("stop_generating-hidden");
                     play_last_message(scroll, response);
                     load_conversations();
-                    hide_sidebar(true);                
+                    hide_sidebar();                
                 })
                 .catch((error) => {
                     console.error("Error on generate text:", error);
@@ -1239,7 +1255,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     await load_conversation(await get_conversation(conversation_id));
                     stop_generating.classList.add("stop_generating-hidden");
                     load_conversations();
-                    hide_sidebar(true);                
+                    hide_sidebar();                
                 })
                 .catch((error) => {
                     console.error("Error on generate image:", error);
@@ -1252,7 +1268,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             return generate_image(message, model);
         }
         return generate_text(message, model);
-    }
+    } 
     try {
         let api_key;
         if (is_demo && !provider) {
