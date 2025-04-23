@@ -14,7 +14,7 @@ window.checkUrls.push("https://g4f.hopto.org");
 async function checkUrl(url) {
     let response;
     try {
-        response = await fetch(`${url}/backend-api/v2/version`);
+        response = await fetch(`${url}/backend-api/v2/version?cache=true`);
     } catch (error) {
         console.debug("Error check url: ", url);
         return false;

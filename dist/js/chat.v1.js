@@ -1724,7 +1724,7 @@ const load_conversation = async (conversation, scroll=true) => {
         suggestions = null;
     } else if (countTokensEnabled && window.GPTTokenizer_cl100k_base) {
         let filtered = prepare_messages(messages, null, true, false);
-        filtered.filter((item)=>!Array.isArray(item.content));
+        filtered = filtered.filter((item)=>!Array.isArray(item.content));
         if (filtered.length > 0) {
             last_model = last_model?.startsWith("gpt-3") ? "gpt-3.5-turbo" : "gpt-4"
             let count_total = GPTTokenizer_cl100k_base?.encodeChat(filtered, last_model).length
