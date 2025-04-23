@@ -2,16 +2,15 @@ window.oauthConfig = {
     clientId: '762e4f6f-2af6-437c-ad93-944cc17f9d23',
     scopes: ['inference-api']
 }
-window.checkUrls = [
-    "https://g4f.hopto.org",
-];
-if (window.location.protocol !== "https:") {
-    window.checkUrls.push("http://localhost:8080");
+window.checkUrls = [];
+if (window.location.protocol === "file:") {
     window.checkUrls.push("http://localhost:1337");
+    window.checkUrls.push("http://localhost:8080");
 }
 if (["https:", "http:"].includes(window.location.protocol)) {
     window.checkUrls.push(window.location.origin);
 }
+window.checkUrls.push("https://g4f.hopto.org");
 async function checkUrl(url) {
     let response;
     try {
@@ -32,7 +31,9 @@ async function checkUrl(url) {
 window.backendUrl = localStorage.getItem('backendUrl') || "";
 window.connectToBackend = async () => {
     for (const url of window.checkUrls) {
-        await checkUrl(url);
+        if(await checkUrl(url)) {
+            return;
+        }
     }
 };
 
@@ -56,7 +57,9 @@ window.translateElements = function (elements = null) {
     });
 }
 document.addEventListener("DOMContentLoaded", (event) => {
-    connectToBackend()
+    if (!window.backendUrl) {
+        window.connectToBackend();
+    }
     translateElements();
 });
 let newTranslations = [];

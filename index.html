@@ -204,6 +204,10 @@
             import * as hub from "@huggingface/hub";
             import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
 
+            if (window.backendUrl) {
+                window.connectToBackend();
+            }
+
             window.addEventListener('load', async function() {
                 if (!localStorage.getItem(window.translationKey)) {
                     try {
