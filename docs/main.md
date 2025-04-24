@@ -17,16 +17,16 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 - [Local Usage Guide](local.html)
 - [Authentication Guide](authentication.html)
 - [Configuration Guide](configuration.html)
-- [Legacy API](legacy.html)
 
 ---
 
 ## 🤖 G4F Clients
 
-- [Client Overview](client.html)
+- [Python Client](client.html)
 - [AsyncClient API Guide](async_client.html)
 - [Requests API Guide](requests.html)
 - [Interference API Guide](interference-api.html)
+- [Legacy API](legacy.html)
 
 ---
 
