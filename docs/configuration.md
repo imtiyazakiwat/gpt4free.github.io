@@ -95,4 +95,4 @@ set G4F_PROXY=http://host:port
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

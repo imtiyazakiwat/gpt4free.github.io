@@ -275,4 +275,4 @@ print("Success!" if response.status_code == 200 else f"Failed: {response.status_
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

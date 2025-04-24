@@ -62,4 +62,4 @@ We are constantly improving GPT4Free. If you encounter issues or want to contrib
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

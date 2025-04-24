@@ -130,4 +130,4 @@ By specifying providers in a space-separated string, you can efficiently target 
 ---
 
 [Go to Interference API Docs](docs/interference-api.md)
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

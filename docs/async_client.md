@@ -692,4 +692,4 @@ Remember to handle errors gracefully, implement rate limiting, and monitor your 
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

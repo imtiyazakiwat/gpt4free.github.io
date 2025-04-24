@@ -245,4 +245,4 @@ For further customization and advanced use cases, refer to the G4F and PydanticA
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

@@ -177,4 +177,4 @@ The G4F Interference API provides a seamless way to integrate G4F with existing 
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

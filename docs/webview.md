@@ -20,13 +20,16 @@ pip install g4f[webview]
 
 ```python
 from g4f.gui.webview import run_webview
+
 run_webview(debug=True)
 ```
+
 or execute the following command:
+
 ```bash
 python -m g4f.gui.webview -debug
 ```
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

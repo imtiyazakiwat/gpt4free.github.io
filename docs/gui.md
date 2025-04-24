@@ -209,4 +209,4 @@ http://localhost:8080/chat/
 
 ---
 
-[Retrun to Documentation](/)
+[Return to Documentation](/)

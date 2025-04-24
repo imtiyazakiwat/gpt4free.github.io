@@ -125,4 +125,4 @@ print(response.choices[0].message.content)
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

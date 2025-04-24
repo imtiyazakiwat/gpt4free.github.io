@@ -41,4 +41,4 @@ pip uninstall nodriver
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)

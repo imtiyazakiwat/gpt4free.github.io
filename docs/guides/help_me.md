@@ -107,4 +107,4 @@ These are just a few ways AI can revolutionize your coding experience. As AI tec
 
 ---
 
-[Retrun to Documentation](/docs/main)
+[Return to Documentation](/docs/main)
