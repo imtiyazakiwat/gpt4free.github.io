@@ -62,4 +62,4 @@ We are constantly improving GPT4Free. If you encounter issues or want to contrib
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to GPT4Free Repository](https://github.com/xtekky/gpt4free)
