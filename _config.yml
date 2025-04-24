@@ -273,7 +273,7 @@ footer-hover-col: "#0085A1"
 #     values:
 #       layout: "page"
 
-remote_theme: pages-themes/minimal@v0.2.0
+# remote_theme: pages-themes/minimal@v0.2.0
 
 plugins:
   - jekyll-paginate
