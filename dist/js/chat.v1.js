@@ -111,6 +111,9 @@ if (window.markdownit) {
             }).join("\n");
         }
         content = content.replaceAll(/<!-- generated images start -->|<!-- generated images end -->/gm, "")
+        if (!content.includes("```")) {
+            content = content.replaceAll("\n", "\n\n");
+        }
         return markdown.render(content)
             .replaceAll("<a href=", '<a target="_blank" href=')
             .replaceAll('<code>', '<code class="language-plaintext">')
