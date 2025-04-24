@@ -111,7 +111,7 @@ if (window.markdownit) {
             }).join("\n");
         }
         content = content.replaceAll(/<!-- generated images start -->|<!-- generated images end -->/gm, "")
-        if (!content.includes("```")) {
+        if (!content.includes("```") && !content.includes("\n>")) {
             content = content.replaceAll("\n", "\n\n");
         }
         return markdown.render(content)
