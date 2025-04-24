@@ -1,5 +1,4 @@
 # G4F - Interference API Usage Guide
-  
 
 ## Table of Contents
    - [Introduction](#introduction)
@@ -175,8 +174,7 @@ Selecting the right provider is a key step in configuring the G4F Interference A
   
 ## Conclusion
 The G4F Interference API provides a seamless way to integrate G4F with existing OpenAI-based applications and tools. By following this guide, you should now be able to set up, run, and use the Interference API effectively. Whether you're using it for text generation, image creation, or as a drop-in replacement for OpenAI in your projects, the Interference API offers flexibility and power for your AI-driven applications.
- 
 
 ---
 
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

@@ -1,5 +1,3 @@
-
-
 # G4F Client API Guide
 
 ## Table of Contents
@@ -492,6 +490,6 @@ while True:
  
 This guide provides a comprehensive overview of the G4F Client API, demonstrating its versatility in handling various AI tasks, from text generation to image analysis and creation. By leveraging these features, you can build powerful and responsive applications that harness the capabilities of advanced AI models.
 
+---
 
----  
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

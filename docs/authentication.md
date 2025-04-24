@@ -1,4 +1,5 @@
 **# G4F - Authentication Guide**  
+
 This documentation explains how to authenticate with G4F providers and configure GUI security. It covers API key management, cookie-based authentication, rate limiting, and GUI access controls.
 
 ---
@@ -271,3 +272,7 @@ print("Success!" if response.status_code == 200 else f"Failed: {response.status_
 ---
 
 **[⬆ Back to Top](#table-of-contents)** | **[Providers and Models →](providers-and-models.md)**
+
+---
+
+[Retrun to Documentation](/docs/main)

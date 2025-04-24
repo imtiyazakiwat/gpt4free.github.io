@@ -1,4 +1,3 @@
-
 ### G4F - Configuration
 
 
@@ -93,3 +92,7 @@ export G4F_PROXY="http://host:port"
 ```bash
 set G4F_PROXY=http://host:port
 ```
+
+---
+
+[Retrun to Documentation](/docs/main)

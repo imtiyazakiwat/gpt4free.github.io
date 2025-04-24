@@ -242,3 +242,7 @@ By following these steps, you have successfully integrated PydanticAI models int
 - **Tool calls within AI requests are not fully supported** at the moment. Use the agent's basic functionality for generating responses and handle external calls separately.
 
 For further customization and advanced use cases, refer to the G4F and PydanticAI documentation.
+
+---
+
+[Retrun to Documentation](/docs/main)

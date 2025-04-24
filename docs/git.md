@@ -123,6 +123,6 @@ print(response.choices[0].message.content)
 
 **_For more information or support, please visit the [G4F GitHub Issues page](https://github.com/xtekky/gpt4free/issues)._**
 
+---
 
----  
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

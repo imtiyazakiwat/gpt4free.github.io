@@ -59,3 +59,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 ---
 
 We are constantly improving GPT4Free. If you encounter issues or want to contribute, visit our GitHub repository. Happy building!
+
+---
+
+[Retrun to Documentation](/docs/main)

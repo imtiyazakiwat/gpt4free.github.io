@@ -201,5 +201,6 @@ To incorporate file uploads into your client applications, include the `bucket` 
 * **Error Handling:** Implement robust error handling in both Python and JavaScript to gracefully manage potential issues during file uploads, downloads, and API interactions.
 * **Dependencies:** Ensure all required packages are installed (`pip install -U g4f[files]` for Python).
 
----  
-[Return to Home](/)
+---
+
+[Retrun to Documentation](/docs/main)

@@ -168,4 +168,6 @@ response = g4f.ChatCompletion.create(
 print(f"Result:", response)
 ```
 
-[Return to Home](/)
+---
+
+[Retrun to Documentation](/docs/main)

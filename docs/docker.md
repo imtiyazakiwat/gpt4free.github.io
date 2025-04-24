@@ -1,4 +1,3 @@
-
 # G4F Docker Setup
 
 ## Table of Contents
@@ -125,4 +124,4 @@ If you're running the server directly with Python, you can stop it by pressing C
 
 ---
 
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

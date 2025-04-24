@@ -60,3 +60,7 @@ response = g4f.ChatCompletion.create(model='gpt-3.5-turbo', provider=g4f.Provide
 for message in response:
     print(message, flush=True, end='')
 ```
+
+---
+
+[Retrun to Documentation](/docs/main)

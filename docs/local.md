@@ -158,6 +158,6 @@ client.list_models()
    2. **Out of memory error**: Choose a smaller model or increase your system's RAM.
    3. **Slow inference**: Consider using a GPU or a more powerful CPU.
 
+---
 
-
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

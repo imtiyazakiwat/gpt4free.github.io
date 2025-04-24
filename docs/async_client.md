@@ -692,4 +692,4 @@ Remember to handle errors gracefully, implement rate limiting, and monitor your 
 
 ---
 
-[Return to Home](/)
+[Retrun to Documentation](/docs/main)

@@ -81,3 +81,7 @@ In this example:
 - Multiple images can be sent. Each image has two data parts: image data (in Data URI format for the API) and an optional filename.
 - The client supports bytes, IO objects, and PIL images as input.
 - Ensure you use a provider that supports vision and multiple images.
+
+---
+
+[Retrun to Documentation](/docs/main)

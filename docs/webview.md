@@ -27,4 +27,6 @@ or execute the following command:
 python -m g4f.gui.webview -debug
 ```
 
-[Return to Home](/)
+---
+
+[Retrun to Documentation](/docs/main)
