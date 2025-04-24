@@ -1,4 +1,3 @@
-
 ### G4F - Local Usage Guide
  
 
