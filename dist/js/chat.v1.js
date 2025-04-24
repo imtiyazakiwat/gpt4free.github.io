@@ -3008,10 +3008,10 @@ async function api(ressource, args=null, files=null, message_id=null, scroll=tru
         } else {
             try {
                 await read_response(response, message_id, args.provider || null, scroll, finish_message);
-                await finish_message();
             } catch (e) {
                 console.error(e);
             }
+            await finish_message();
             return;
         }
     } else if (args) {
