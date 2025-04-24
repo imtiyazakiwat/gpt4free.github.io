@@ -669,12 +669,15 @@ input-count .text {
 }
 
 .file-label,
-.micro-label {
+.micro-label,
+.code {
     cursor: pointer;
     position: absolute;
     top: 8px;
     left: 8px;
     padding: 2px;
+    width: 24px;
+    text-align: center;
 }
 
 .file-label:has(> input:valid),
@@ -693,8 +696,17 @@ label.image-label {
 }
 
 label[for="micro"] {
-    top: 50px;
-    padding: 4px;
+    top: 52px;
+}
+
+.code {
+    top: 76px;
+    padding: 4px 0;
+    font-weight: bold;
+    height: 20px;
+}
+.code:hover {
+    border-color: var(--accent);
 }
 
 @media (pointer:none), (pointer:coarse) {
@@ -1475,7 +1487,7 @@ form textarea {
 
 #userInput {
     min-height: 90px;
-    height: 90px;
+    height: 100px;
     flex: 1;
     padding: 10px 30px;
     color: var(--colour-3);

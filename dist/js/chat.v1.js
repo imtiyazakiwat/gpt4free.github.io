@@ -1,6 +1,7 @@
 const colorThemes       = document.querySelectorAll('[name="theme"]');
 const chatBody          = document.getElementById(`chatBody`);
 const userInput         = document.getElementById("userInput");
+const codeButton        = document.querySelector(".code");
 const box_conversations = document.querySelector(`.top`);
 const stop_generating   = document.querySelector(`.stop_generating`);
 const regenerate_button = document.querySelector(`.regenerate`);
@@ -46,7 +47,7 @@ let login_urls_storage = {
 };
 
 modelTags = {
-    image: "🖼️ Image Generation",
+    image: "📸 Image Generation",
     vision: "👓 Image Upload",
     audio: "🎧 Audio Generation",
     video: "🎥 Video Generation"
@@ -556,6 +557,9 @@ const handle_ask = async (do_ask_gpt = true, message = null) => {
         connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}`, false, bucket_id); //Retrieve and refine
         return;
     }
+    if (!message.length) {
+        return;
+    }
 
     await add_conversation(window.conversation_id);
     let message_index = await add_message(window.conversation_id, "user", message);
@@ -935,12 +939,14 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         log_storage.appendChild(p);
         await api("log", {...message, provider: provider_storage[message_id]});
     } else if (message.type == "preview") {
-        if (img = content_map.inner.querySelector("img"))
-            if (!img.complete)
-                return;
-            else
-                img.src = message.images;
-        else {
+        let img;
+        if (img = content_map.inner.querySelector("img")) {
+            if (img.complete) {
+                const backup = img.src;
+                img.src = message.urls;
+                img.onerror = () => img.src = backup;
+            }
+        } else {
             content_map.inner.innerHTML = markdown_render(message.preview);
             await register_message_images();
         }
@@ -2303,11 +2309,8 @@ window.addEventListener("hashchange", (event) => {
 });
 window.addEventListener('load', async function() {
     await on_load();
-    if (!window.conversation_id || window.conversation_id == "{{conversation_id}}") {
-        window.conversation_id = generateUUID();
-    } else {
-        await on_api();
-    }
+    await on_api();
+
     let conversation = await get_conversation(window.conversation_id);
     if (conversation && !conversation.share) {
         return await load_conversation(conversation);
@@ -2515,11 +2518,17 @@ async function on_api() {
             await handle_ask(!do_enter);
         }
     });
+    let timeoutBlur = null;
     userInput.addEventListener("focus", async (evt) => {
         userInput.style.height = "100%";
     });
     userInput.addEventListener("blur", async (evt) => {
-        setTimeout(() => userInput.style.height = "", 100);
+        timeoutBlur = setTimeout(() => userInput.style.height = "", 200);
+    });
+    codeButton.addEventListener("click", async () => {
+        clearTimeout(timeoutBlur);
+        userInput.value = userInput.value.trim() ? userInput.value.trim() + "\n```\n" : "```\n";
+        userInput.focus();
     });
     sendButton.addEventListener(`click`, async () => {
         console.log("clicked send");
@@ -2645,11 +2654,9 @@ async function on_api() {
     hide_systemPrompt.addEventListener('change', async (event) => {
         update_systemPrompt_icon(event.target.checked);
     });
-    const userInputHeight = document.getElementById("message-input-height");
+    const userInputHeight = appStorage.getItem("userInput-height");
     if (userInputHeight) {
-        if (userInputHeight.value) {
-            userInput.style.maxHeight = `${userInputHeight.value}px`;
-        }
+        userInput.style.maxHeight = `${userInputHeight}px`;
     }
     const darkMode = document.getElementById("darkMode");
     if (darkMode) {
@@ -2796,11 +2803,6 @@ function connectToSSE(url, do_refine, bucket_id) {
             inputCount.innerText = `${window.translate('Error:')} ${data.error.message}`;
             paperclip.classList.remove("blink");
             fileInput.value = "";
-        } else if (data.action == "media") {
-            inputCount.innerText = `${window.translate('File:')} ${data.filename}`;
-            const url = `${window.backendUrl}/files/${bucket_id}/media/${data.filename}`;
-            const media = [{bucket_id: bucket_id, url: url, name: data.filename}];
-            await handle_ask(false, media);
         } else if (data.action == "load") {
             inputCount.innerText = `${window.translate('Read data:')} ${formatFileSize(data.size)}`;
         } else if (data.action == "refine") {
@@ -2809,7 +2811,7 @@ function connectToSSE(url, do_refine, bucket_id) {
             inputCount.innerText = `${window.translate('Download:')} ${data.count} files`;
         } else if (data.action == "done") {
             if (do_refine) {
-                connectToSSE(`${window.backendUrl}/backend-api/v2/files/${bucket_id}?refine_chunks_with_spacy=true`, false, bucket_id);
+                connectToSSE(`${window.backendUrl}/backend-api/v2/files/${encodeURIComponent(bucket_id)}?refine_chunks_with_spacy=true`, false, bucket_id);
                 return;
             }
             fileInput.value = "";
@@ -2821,7 +2823,7 @@ function connectToSSE(url, do_refine, bucket_id) {
             appStorage.setItem(`bucket:${bucket_id}`, data.size);
             inputCount.innerText = window.translate("Files are loaded successfully");
 
-            const url = `${window.backendUrl}/backend-api/v2/files/${bucket_id}`;
+            const url = `${window.backendUrl}/backend-api/v2/files/${encodeURIComponent(bucket_id)}`;
             const media = [{bucket_id: bucket_id, url: url}];
             await handle_ask(false, media);
         }
@@ -3162,27 +3164,49 @@ document.getElementById("pin").addEventListener("click", async () => {
     let selected_provider = providerSelect.options[providerSelect.selectedIndex];
     selected_provider = selected_provider.value ? selected_provider : null;
     const selected_model = get_selected_model();
-    if (selected_provider || selected_model) {
-        const pinned = document.createElement("button");
-        pinned.classList.add("pinned");
-        if (selected_provider) pinned.dataset.provider = selected_provider.value;
-        if (selected_model) pinned.dataset.model = selected_model.value;
-        pinned.innerHTML = `
-            <span>
-            ${selected_provider ? selected_provider.dataset.label || selected_provider.text : ""}
-            ${selected_provider && selected_model ? "/" : ""}
-            ${selected_model ? selected_model.dataset.label || selected_model.text : ""}
-            </span>
-            <i class="fa-regular fa-circle-xmark"></i>`;
-        pinned.addEventListener("click", () => pin_container.removeChild(pinned));
-        let all_pinned = pin_container.querySelectorAll(".pinned");
-        while (all_pinned.length > 4) {
-            pin_container.removeChild(all_pinned[0])
-            all_pinned = pin_container.querySelectorAll(".pinned");
-        }
-        pin_container.appendChild(pinned);
-    }
+    add_pinned(selected_provider, selected_model);
 });
+
+(async () => {
+    JSON.parse(appStorage.getItem("pinned") || "[]").forEach((el) => {
+        add_pinned(el.provider, el.model, false);
+    });
+})();
+
+function add_pinned(selected_provider, selected_model, save=true) {
+    if (save) {
+        const all_pinned_saved = JSON.parse(appStorage.getItem("pinned") || "[]");
+        appStorage.setItem("pinned", JSON.stringify([{
+            provider: selected_provider?.value,
+            model: selected_model?.value,
+        }, ...all_pinned_saved]));
+    }
+    const pinned = document.createElement("button");
+    pinned.classList.add("pinned");
+    if (selected_provider) pinned.dataset.provider = selected_provider.value || selected_provider;
+    if (selected_model) pinned.dataset.model = selected_model.value || selected_model;
+    pinned.innerHTML = `
+        <span>
+        ${selected_provider && selected_provider.dataset ? selected_provider.dataset.label || selected_provider.text : selected_provider}
+        ${selected_provider && selected_model ? "/" : ""}
+        ${selected_model && selected_model.dataset ? selected_model.dataset.label || selected_model.text : selected_model}
+        </span>
+        <i class="fa-regular fa-circle-xmark"></i>`;
+    pinned.addEventListener("click", () => {
+        pin_container.removeChild(pinned);
+        let all_pinned = JSON.parse(appStorage.getItem("pinned") || "[]");
+        all_pinned = all_pinned.filter((el) => {
+            return el.provider != pinned.dataset.provider || el.model != pinned.dataset.model;
+        });
+        appStorage.setItem("pinned", JSON.stringify(all_pinned));
+    });
+    all_pinned = pin_container.querySelectorAll(".pinned");
+    while (all_pinned.length > 4) {
+        pin_container.removeChild(all_pinned[0])
+        all_pinned = pin_container.querySelectorAll(".pinned");
+    }
+    pin_container.appendChild(pinned);
+}
 
 switchInput.addEventListener("change", () => {
     const method = switchInput.checked ? "add" : "remove";
