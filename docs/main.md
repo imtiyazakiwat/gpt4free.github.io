@@ -1,4 +1,4 @@
-# GPT4Free Documentation
+## G4F - Documentation
 
 Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything you need to get started, understand the available features, and integrate G4F into your projects. Use the sections below to explore various aspects of the G4F ecosystem.
 
