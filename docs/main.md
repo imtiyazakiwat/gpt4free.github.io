@@ -32,7 +32,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 ## 🧠 Providers & Models
 
-- [Available Providers and Models](providers-and-models.html)
+- [Available Providers and Models](https://github.com/gpt4free/gpt4free.github.io/blob/main/docs%2Fproviders-and-models.md)
 - [Selecting a Provider](selecting_a_provider.html)
 
 ---
