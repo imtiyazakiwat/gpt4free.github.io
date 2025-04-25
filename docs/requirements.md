@@ -10,9 +10,9 @@ Install g4f with all possible dependencies:
 ```
 pip install -U g4f[all]
 ```
-Or install only g4f and the required packages for the OpenaiChat provider:
+Install g4f with slim dependencies (without Browser):
 ```
-pip install -U g4f[openai]
+pip install -U g4f[slim]
 ```
 Install required packages for the Interference API:
 ```
