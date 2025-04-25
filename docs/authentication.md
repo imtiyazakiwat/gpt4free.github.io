@@ -1,4 +1,4 @@
-**# G4F - Authentication Guide**  
+# G4F - Authentication Guide
 
 This documentation explains how to authenticate with G4F providers and configure GUI security. It covers API key management, cookie-based authentication, rate limiting, and GUI access controls.
 
