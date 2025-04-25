@@ -54,7 +54,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 ## 🧩 Integrations
 
-- [PydanticAI & LangChain Integration](pydantic_ai.html)
+- [PydanticAI&LangChain Integration](pydantic_ai.html)
 
 ---
 
