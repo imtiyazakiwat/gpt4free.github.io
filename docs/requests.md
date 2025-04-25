@@ -1,4 +1,4 @@
-# G4F Requests API Guide
+## G4F - Requests API Guide
 
 ## Table of Contents
 - [Introduction](#introduction)
