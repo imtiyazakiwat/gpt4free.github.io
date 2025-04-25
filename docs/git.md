@@ -1,4 +1,4 @@
-# G4F - Git Installation Guide
+## G4F - Git Installation Guide
 
 This guide provides step-by-step instructions for installing G4F from the source code using Git.
 
