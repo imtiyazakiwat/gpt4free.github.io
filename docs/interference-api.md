@@ -160,7 +160,7 @@ for choice in json_response:
 
 ## Selecting a Provider
 
-**Provider Selection**: [How to Specify a Provider?](selecting_a_provider.md)
+**Provider Selection**: [How to Specify a Provider?](selecting_a_provider)
 
 Selecting the right provider is a key step in configuring the G4F Interference API to suit your needs. Refer to the guide linked above for detailed instructions on choosing and specifying a provider.
 
