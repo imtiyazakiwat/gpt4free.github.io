@@ -1,4 +1,4 @@
-### G4F - Webview GUI
+## G4F - Webview GUI
 
 Open the GUI in a window of your OS. Runs on a local/static/ssl server and use a JavaScript API.
 Supports login into the OpenAI Chat (.har files), Image Upload and streamed Text Generation.
