@@ -1,4 +1,4 @@
-# G4F Docker Setup
+## G4F - Docker Setup
 
 ## Table of Contents
    - [Prerequisites](#prerequisites)
