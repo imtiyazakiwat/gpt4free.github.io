@@ -52,8 +52,12 @@ __all__ = [
 ```py
 import g4f
 
-response = g4f.ChatCompletion.create(model='gpt-4o, provider=g4f.Provider.PROVIDERNAME,
-                                    messages=[{"role": "user", "content": "test"}], stream=True)
+response = g4f.ChatCompletion.create(
+    model='gpt-4o',
+    provider=g4f.Provider.PROVIDERNAME,
+    messages=[{"role": "user", "content": "test"}],
+    stream=True
+)
 
 for message in response:
     print(message, flush=True, end='')
