@@ -1,4 +1,4 @@
-## Vision Support in Chat Completion
+## G4F - Vision Support in Chat Completion
 
 This documentation provides an overview of how to integrate vision support into chat completions using an API and a client. It includes examples to guide you through the process.
 
