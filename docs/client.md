@@ -1,4 +1,4 @@
-# G4F - Client API Guide
+## G4F - Client API Guide
 
 ## Table of Contents
    - [Introduction](#introduction)
