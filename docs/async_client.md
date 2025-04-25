@@ -1,4 +1,4 @@
-# G4F - AsyncClient API Guide
+## G4F - AsyncClient API Guide
 The G4F AsyncClient API is a powerful asynchronous interface for interacting with various AI models. This guide provides comprehensive information on how to use the API effectively, including setup, usage examples, best practices, and important considerations for optimal performance.
 
 ## Compatibility Note
