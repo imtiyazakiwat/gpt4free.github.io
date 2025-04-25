@@ -1,4 +1,4 @@
-# G4F - GUI Documentation
+## G4F - GUI Documentation
 
 ## Overview
 The G4F GUI is a self-contained, user-friendly interface designed for interacting with multiple AI models from various providers. It allows users to generate text, code, and images effortlessly. Advanced features such as speech recognition, file uploads, conversation backup/restore, and more are included. Both the backend and frontend are fully integrated into the GUI, making setup simple and seamless.
