@@ -1,4 +1,4 @@
-### G4F - Configuration
+## G4F - Configuration
 
 
 ## Table of Contents
