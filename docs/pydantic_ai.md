@@ -1,6 +1,6 @@
-# PydanticAI Integration with G4F Client
+## PydanticAI Integration with G4F Client
 
-This README provides an overview of how to integrate PydanticAI with the G4F client to create an agent that interacts with a language model. With this setup, you'll be able to apply patches to use PydanticAI models, enable debugging, and run simple agent-based interactions synchronously. However, please note that tool calls within AI requests are currently **not fully supported** in this environment.
+This README provides an overview of how to integrate PydanticAI with the G4F client to create an agent that interacts with a language model. With this setup, you'll be able to apply patches to use PydanticAI with G4F, enable debugging, and run simple agent-based interactions synchronously. However, please note that tool calls within AI requests are currently **not fully supported** in this environment.
 
 ## Requirements
 
@@ -234,7 +234,7 @@ This example shows how to use LangChain's `ChatAI` integration to create a conve
 
 ## Conclusion
 
-By following these steps, you have successfully integrated PydanticAI models into the G4F client, created an agent, and enabled debugging. This allows you to conduct conversations with the language model, pass system prompts, and retrieve responses synchronously.
+By following these steps, you have successfully integrated G4F models into PydanticAI, created an agent, and enabled debugging. This allows you to conduct conversations with the language model, pass system prompts, and retrieve responses synchronously.
 
 ### Notes:
 - The `api_key` parameter when calling `patch_infer_model` is optional. If you don’t provide it, the system will still work without an API key.
