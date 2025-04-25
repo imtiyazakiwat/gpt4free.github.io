@@ -1,4 +1,4 @@
-### G4F - Media Documentation
+## G4F - Media Documentation
 
 This document outlines how to use the G4F (Generative Framework) library to generate and process various media types, including audio, images, and videos.
 
