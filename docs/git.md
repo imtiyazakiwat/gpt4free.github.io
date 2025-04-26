@@ -112,7 +112,7 @@ print(response.choices[0].message.content)
    1. Ensure all prerequisites are correctly installed.
    2. Check that you're in the correct directory and the virtual environment is activated.
    3. Try reinstalling the dependencies.
-   4. Consult the [G4F documentation](/docs/main.html) for more detailed information.
+   4. Consult the [G4F documentation](/docs/) for more detailed information.
 
 ## Additional Resources
    - [G4F GitHub Repository](https://github.com/xtekky/gpt4free)
@@ -125,4 +125,4 @@ print(response.choices[0].message.content)
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

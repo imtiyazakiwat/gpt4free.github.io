@@ -144,4 +144,4 @@ print(f"Result:", response)
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

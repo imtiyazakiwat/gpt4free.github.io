@@ -2,7 +2,7 @@
 
 This document provides an overview of various AI providers and models, including text generation, image generation, and vision capabilities. It aims to help users navigate the diverse landscape of AI services and choose the most suitable option for their needs.
 
-> **Note**: See our [Authentication Guide](authentication.html) for authentication instructions for the provider.
+> **Note**: See our [Authentication Guide](authentication.md) for authentication instructions for the provider.
 
 ## Table of Contents
   - [Providers](#providers)
@@ -267,4 +267,4 @@ Remember to stay updated with the latest developments in the AI field, as new mo
 
 ---
 
-[Return to Documentation](https://gpt4free.github.io/docs/main.html)
+[Return to Documentation](/docs/)

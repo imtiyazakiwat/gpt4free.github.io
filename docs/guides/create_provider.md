@@ -65,4 +65,4 @@ for message in response:
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

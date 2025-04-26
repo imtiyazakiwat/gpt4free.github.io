@@ -492,4 +492,4 @@ This guide provides a comprehensive overview of the G4F Client API, demonstratin
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

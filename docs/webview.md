@@ -32,4 +32,4 @@ python -m g4f.gui.webview -debug
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

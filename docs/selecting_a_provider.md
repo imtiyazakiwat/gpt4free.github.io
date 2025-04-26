@@ -129,8 +129,8 @@ By specifying providers in a space-separated string, you can efficiently target 
 
 ---
 
-[Go to Interference API Docs](docs/interference-api)
+[Go to Interference API Docs](interference-api.md)
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)

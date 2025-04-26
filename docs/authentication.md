@@ -271,8 +271,8 @@ print("Success!" if response.status_code == 200 else f"Failed: {response.status_
 
 ---
 
-**[Providers and Models →](/docs/providers-and-models)**
+**[Providers and Models →](providers-and-models.md)**
 
-**[← Return to Documentation](/docs/main)**
+**[← Return to Documentation](/docs/)**
 
 **[⬆ Back to Top](#table-of-contents)**

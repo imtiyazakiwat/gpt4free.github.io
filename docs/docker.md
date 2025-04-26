@@ -107,7 +107,7 @@ python test_g4f.py
 - Ensure that you have the necessary permissions to run Docker commands. You might need to use `sudo` or add your user to the `docker` group.
 - If the server doesn't start, check the logs for any error messages and ensure all dependencies are correctly installed.
 
-**_For more detailed information on API endpoints and usage, refer to the [G4F API documentation](/docs/interference-api.html)._**
+**_For more detailed information on API endpoints and usage, refer to the [G4F API documentation](/docs/interference-api.md)._**
 
 
 
@@ -124,4 +124,4 @@ If you're running the server directly with Python, you can stop it by pressing C
 
 ---
 
-[Return to Documentation](/docs/main)
+[Return to Documentation](/docs/)
