@@ -28,7 +28,8 @@ async def main():
 asyncio.run(main())
 ```
 
-#### **More examples for Generate Audio:**
+<details>
+<summary>Examples with other providers</summary>
 
 ```python
 from g4f.client import Client
@@ -59,6 +60,7 @@ response.data[0].save("google-tts.mp3")
 
 # The gTTS provider also support the audio parameters `tld` and `slow`
 ```
+</details>
 
 #### **Transcribe an Audio File:**
 
@@ -100,6 +102,69 @@ if __name__ == "__main__":
 - **Model Selection**: If `g4f.models.default` does not support audio transcription, you may need to specify a model that does (consult the provider's documentation for supported models).
 
 This example complements the guide by showcasing how to handle audio inputs asynchronously, expanding on the multimodal capabilities of the G4F AsyncClient API.
+
+#### **More examples for Transcription:**
+
+<details>
+<summary>JavaScript</summary>
+
+```javascript
+const endpoint = "/v1/audio/transcriptions";
+const formData = new FormData();
+
+formData.append("file", audioFile);
+formData.append("model", "");
+
+try {
+    const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+    });
+    if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+    }
+    const result = await response.json();
+    console.log("Transcribed text:", result.text);
+} catch (error) {
+    console.error("Transcription error:", error);
+    return null;
+}
+```
+</details>
+
+<details>
+<summary>Python and requests</summary>
+
+```python
+import requests
+
+with open('audio.wav', 'rb') as audio_file:
+    response = requests.post('http://localhost:8080/api/markitdown', files={'file': audio_file})
+    if response.status_code == 200:
+        data = response.json()
+        print(data['text'])
+    else:
+        print(f"Error: {response.status_code}, {response.text}")
+```
+</details>
+
+<details>
+<summary>Python and openai</summary>
+
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="http://localhost:8080/v1", api_key="secret")
+
+with open("audio.wav", "rb") as file:
+    transcript = client.audio.transcriptions.create(
+        model="",
+        extra_body={"provider": "MarkItDown"},
+        file=file
+    )
+print(transcript.text)
+```
+</details>
 
 ---
 

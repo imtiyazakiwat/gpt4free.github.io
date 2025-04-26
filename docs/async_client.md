@@ -116,7 +116,10 @@ client = AsyncClient(
 
 ## Usage Examples
 ### Text Completions
-**Generate text completions using the ChatCompletions endpoint:**
+
+<details>
+<summary>Generate text completions using the ChatCompletions endpoint</summary>
+
 ```python
 import asyncio
 from g4f.client import AsyncClient
@@ -139,8 +142,11 @@ async def main():
 
 asyncio.run(main())
 ```
+</details>
 
-### Streaming Completions
+<details>
+<summary>Streaming Completions</summary>
+
 **Process responses incrementally as they are generated:**
 ```python
 import asyncio
@@ -166,17 +172,19 @@ async def main():
 
 asyncio.run(main())
 ```
+</details>
 
----
+<details>
+<summary>Using a Vision Model</summary>
 
-### Using a Vision Model
 **Analyze an image and generate a description:**
+
 ```python
 import g4f
 import requests
 import asyncio
 from g4f.client import AsyncClient
-from g4f.Provider.CopilotAccount import CopilotAccount
+from g4f.Provider import CopilotAccount
 
 async def main():
     client = AsyncClient(
@@ -201,10 +209,11 @@ async def main():
 
 asyncio.run(main())
 ```
+</details>
 
----
 
-### Transcribing Audio with Chat Completions
+<details>
+<summary>Transcribing Audio with Chat Completions</summary>
 
 Some providers in G4F support audio inputs in chat completions, allowing you to transcribe audio files by instructing the model accordingly. This example demonstrates how to use the `AsyncClient` to transcribe an audio file asynchronously:
 
@@ -247,6 +256,37 @@ if __name__ == "__main__":
 - **Model Selection**: If `g4f.models.default` does not support audio transcription, you may need to specify a model that does (consult the provider's documentation for supported models).
 
 This example complements the guide by showcasing how to handle audio inputs asynchronously, expanding on the multimodal capabilities of the G4F AsyncClient API.
+</details>
+
+<details>
+<summary>Reuse Conversation in Chat Completions</summary>
+
+```python
+import g4f
+import asyncio
+from g4f.client import AsyncClient
+from g4f.Provider import OpenaiAccount
+
+async def main():
+    client = AsyncClient(
+        provider=OpenaiAccount
+    )
+
+    response = await client.chat.completions.create(
+        messages="I was born on 01-01-1999.",
+    )
+
+    response = await client.chat.completions.create(
+        messages="How old i am? I told you before.",
+        conversation=response.conversation
+    )
+
+    print(response.conversation.__dict__)
+    print(response.choices[0].message.content)
+
+asyncio.run(main())
+```
+</details>
 
 ---
 
@@ -527,7 +567,9 @@ asyncio.run(main())
 ---
 
 ### Concurrent Tasks with asyncio.gather
+
 **Execute multiple tasks concurrently:**
+
 ```python
 import asyncio
 from g4f.client import AsyncClient
@@ -586,6 +628,7 @@ The G4F AsyncClient supports a wide range of AI models and providers, allowing y
    - Custom providers
 
 **To use a specific model or provider, specify it when creating the client or in the API call:**
+
 ```python
 client = AsyncClient(provider=g4f.Provider.OpenaiChat)
 
@@ -609,6 +652,7 @@ Implementing proper error handling and following best practices is crucial when 
 **Here are some key practices to follow:**
 
 1. **Use try-except blocks to catch and handle exceptions:**
+
 ```python
 try:
     response = await client.chat.completions.create(
@@ -625,6 +669,7 @@ except Exception as e:
 ```
 
 2. **Check the response status and handle different scenarios:**
+
 ```python
 if response.choices:
     print(response.choices[0].message.content)
@@ -633,6 +678,7 @@ else:
 ```
 
 3. **Implement retries for transient errors:**
+
 ```python
 import asyncio
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -648,6 +694,7 @@ When working with the G4F AsyncClient API, it's important to implement rate limi
   
 
 1. **Implement rate limiting in your application:**
+
 ```python
 import asyncio
 from aiolimiter import AsyncLimiter
@@ -661,6 +708,7 @@ async def make_api_call():
 ```
 
 2. **Monitor your API usage and implement logging:**
+
 ```python
 import logging
 
@@ -676,6 +724,7 @@ async def make_api_call():
 ```
 
 3. **Use caching to reduce API calls for repeated queries:**
+
 ```python
 from functools import lru_cache
 
