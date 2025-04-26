@@ -93,7 +93,11 @@ appStorage = window.localStorage || {
 
 let markdown_render = (content) => escapeHtml(content);
 if (window.markdownit) {
-    const markdown = window.markdownit();
+    const markdown = window.markdownit({
+        breaks: true,
+        linkify: true,
+        typographer: true
+    });
     markdown_render = (content) => {
         if (Array.isArray(content)) {
             content = content.map((item) => {
@@ -111,9 +115,6 @@ if (window.markdownit) {
             }).join("\n");
         }
         content = content.replaceAll(/<!-- generated images start -->|<!-- generated images end -->/gm, "")
-        if (!content.includes("```") && !content.includes("\n>")) {
-            content = content.replaceAll("\n", "\n\n");
-        }
         return markdown.render(content)
             .replaceAll("<a href=", '<a target="_blank" href=')
             .replaceAll('<code>', '<code class="language-plaintext">')
