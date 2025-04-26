@@ -267,4 +267,4 @@ Remember to stay updated with the latest developments in the AI field, as new mo
 
 ---
 
-[Return to Documentation](/docs/main.md)
+[Return to Documentation](https://gpt4free.github.io/docs/main.html)
