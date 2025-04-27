@@ -95,8 +95,7 @@ let markdown_render = (content) => escapeHtml(content);
 if (window.markdownit) {
     const markdown = window.markdownit({
         breaks: true,
-        linkify: true,
-        typographer: true
+        linkify: true
     });
     markdown_render = (content) => {
         if (Array.isArray(content)) {
