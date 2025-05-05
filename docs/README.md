@@ -56,6 +56,13 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 - [PydanticAI & LangChain Integration](pydantic_ai.md)
 
+
+## 🤗 Greetings to
+
+![Pollinations.AI](https://raw.githubusercontent.com/pollinations/pollinations/refs/heads/master/pollinations.ai/public/banner.webp)
+Pollinations.AI: https://github.com/pollinations/pollinations
+
+
 ---
 
 We are constantly improving GPT4Free. If you encounter issues or want to contribute, visit our GitHub repository. Happy building!
