@@ -39,16 +39,17 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 ## 📂 Files and Media
 
-- [File API Documentation](file.md)
-- [Media Documentation](media.md)
-- [Vision Support](vision.md)
+- [File API Documentation (Files and Documents)](file.md)
+- [Media Documentation (Audio, Image and Video)](media.md)
+- [Vision Support (Image Upload)](vision.md)
 
 ---
 
 ## 🖥️ Interfaces
 
 - [GUI Documentation](gui.md)
-- [Webview GUI](webview.md)
+- [Run in a Window on any OS (Webview)](webview.md)
+- [Run on Your Smartphone Guide](guides/phone.md)
 
 ---
 
@@ -57,7 +58,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 - [PydanticAI & LangChain Integration](pydantic_ai.md)
 
 
-## 🤗 Greetings to
+## 🤗 Greetings
 
 ![Pollinations.AI](https://raw.githubusercontent.com/pollinations/pollinations/refs/heads/master/pollinations.ai/public/banner.webp)
 Pollinations.AI: https://github.com/pollinations/pollinations
