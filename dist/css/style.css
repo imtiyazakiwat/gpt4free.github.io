@@ -113,7 +113,7 @@ body:not(.white) a:visited{
 
 .new_version {
     position: absolute;
-    left: 0;
+    right: 0;
     top: 0;
     padding: 10px;
     font-weight: 500;
@@ -700,13 +700,37 @@ label[for="micro"] {
 }
 
 .code {
+    cursor: pointer;
+    position: absolute;
     top: 76px;
     padding: 4px 0;
+    left: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
     font-weight: bold;
     height: 20px;
+    font-size: 12px;
+    color: var(--colour-3);
+    background-color: var(--blur-bg);
+    border: 1px solid var(--blur-border);
+    border-radius: var(--border-radius-1);
+    transition: all 0.2s ease;
+    padding: 0;
+    overflow: hidden;
 }
+
 .code:hover {
     border-color: var(--accent);
+    background-color: var(--accent);
+    color: white;
+}
+
+.code:active {
+    transform: scale(0.95);
 }
 
 @media (pointer:none), (pointer:coarse) {
@@ -1705,4 +1729,125 @@ form textarea {
     font-weight: 600;
     font-size: 18px;
     margin-left: 8px;
+}
+
+/* NEW */
+.sidebar {
+    border: 1px solid var(--blur-border);
+}
+
+.sidebar.minimized {
+    width: 60px;
+    overflow: hidden;
+}
+
+.sidebar.minimized .sidebar-container {
+    align-items: center;
+    padding: 15px 0;
+}
+
+.sidebar.minimized .sidebar-logo,
+.sidebar.minimized .convo-title,
+.sidebar.minimized .new_convo span,
+.sidebar.minimized .bottom_buttons span,
+.sidebar.minimized .info span,
+.sidebar.minimized .datetime {
+    display: none;
+}
+
+.sidebar.minimized .sidebar-header {
+    justify-content: center;
+    border-bottom: none;
+    margin-bottom: 20px;
+}
+
+.sidebar.minimized .convo .left {
+    justify-content: center;
+}
+
+.sidebar.minimized .new_convo,
+.sidebar.minimized .bottom_buttons button,
+.sidebar.minimized .info {
+    justify-content: center;
+    gap: 0;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 10px;
+}
+
+.sidebar.minimized .fa-ellipsis-vertical,
+.sidebar.minimized .choise {
+    display: none;
+}
+
+.sidebar.minimized .top {
+    align-items: center;
+}
+
+.sidebar.minimized i {
+    font-size: 1.2em;
+}
+
+.sidebar.minimized .mobile-sidebar-toggle {
+    margin: 0;
+}
+
+/* Add some spacing between icon groups */
+.sidebar.minimized .top {
+    margin-bottom: 30px;
+}
+
+.sidebar.minimized .bottom_buttons {
+    margin-top: auto;
+}
+
+.sidebar.minimized .info,
+.sidebar.minimized .convo {
+    display: none;
+}
+
+/* Hide new_convo_icon on desktop */
+@media only screen and (min-width: 40em) {
+    .chat-top-panel .new_convo_icon {
+        display: none;
+    }
+}
+
+/* Default state for desktop: sidebar shown */
+@media only screen and (min-width: 40em) {
+    .sidebar {
+        width: 300px;
+    }
+    
+    /* Hide new_convo_icon on desktop */
+    .chat-top-panel .new_convo_icon {
+        display: none;
+    }
+}
+
+/* Default state for mobile: sidebar hidden/minimized */
+@media only screen and (max-width: 40em) {
+    .sidebar:not(.shown) {
+        width: 0;
+    }
+    
+    .sidebar.minimized {
+        width: 60px;
+    }
+}
+
+.sidebar.minimized .info,
+.sidebar.minimized .convo {
+    display: none;
+}
+
+/* Ensure sidebar is shown by default on desktop */
+@media only screen and (min-width: 40em) {
+    .sidebar {
+        width: 300px;
+    }
+    
+    .sidebar:not(.minimized) {
+        width: 300px;
+    }
 }

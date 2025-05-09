@@ -2030,10 +2030,9 @@ function get_message_id() {
 };
 
 async function hide_sidebar(remove_shown=false) {
-    if (remove_shown) {
+    if (remove_shown && window.innerWidth < 640) { // Only apply on mobile
         sidebar.classList.remove("shown");
     }
-    sidebar_buttons.forEach((el)=>el.classList.remove("rotated"))
     settings.classList.add("hidden");
     chat.classList.remove("hidden");
     log_storage.classList.add("hidden");
@@ -2049,16 +2048,30 @@ async function hide_settings() {
     Array.from(provider_forms).forEach((form) => form.classList.add("hidden"));
 }
 
-
-sidebar_buttons.forEach((el)=>el.addEventListener("click", async () => {
-    if (sidebar.classList.contains("shown") || el.classList.contains("rotated")) {
-        await hide_sidebar(true);
-        chat.classList.remove("hidden");
-    } else {
-        await show_menu();
-        chat.classList.add("hidden");
+sidebar_buttons.forEach((el) => el.addEventListener("click", async () => {
+    // For desktop
+    if (window.innerWidth >= 640) {
+        // Toggle between shown and minimized only
+        if (sidebar.classList.contains("shown")) {
+            // Change from shown to minimized
+            sidebar.classList.remove("shown");
+            sidebar.classList.add("minimized");
+        } else {
+            // Change from minimized to shown
+            sidebar.classList.remove("minimized");
+            sidebar.classList.add("shown");
+        }
+    } 
+    // For mobile
+    else {
+        if (sidebar.classList.contains("shown")) {
+            // Hide sidebar on mobile
+            sidebar.classList.remove("shown");
+        } else {
+            // Show sidebar on mobile
+            sidebar.classList.add("shown");
+        }
     }
-    window.scrollTo(0, 0);
 }));
 
 function add_url_to_history(url) {
@@ -2069,7 +2082,7 @@ function add_url_to_history(url) {
 
 async function show_menu() {
     sidebar.classList.add("shown");
-    sidebar_buttons.forEach((el)=>el.classList.add("rotated"))
+    sidebar.classList.remove("minimized");
     await hide_settings();
     add_url_to_history("#menu");
 }
@@ -2330,6 +2343,20 @@ window.addEventListener('load', async function() {
         await load_conversations();
     }
     await load_conversation(window.conversation_id);
+    
+    // Set default sidebar state based on screen size
+    if (window.innerWidth >= 640) { // 40em = 640px
+        sidebar.classList.add("shown");
+        sidebar.classList.remove("minimized");
+    } else {
+        sidebar.classList.remove("shown");
+    }
+    // Ensure sidebar is shown by default on desktop
+    if (window.innerWidth >= 640) { // 40em = 640px
+        sidebar.classList.add("shown");
+        sidebar.classList.remove("minimized");
+    }
+    
 });
 
 let refreshOnHidden = true;
@@ -2396,6 +2423,11 @@ async function on_load() {
     if (window.hljs) {
         hljs.addPlugin(new HtmlRenderPlugin())
         hljs.addPlugin(new CopyButtonPlugin());
+    }
+    // Ensure sidebar is shown by default on desktop
+    if (window.innerWidth >= 640) {
+        sidebar.classList.add("shown");
+        sidebar.classList.remove("minimized");
     }
 }
 
