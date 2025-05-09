@@ -3403,3 +3403,297 @@ document.getElementById("showLog").addEventListener("click", ()=> {
     settings.classList.add("hidden");
     log_storage.scrollTop = log_storage.scrollHeight;
 });
+
+// Mobile Experience Enhancements
+
+// Create overlay element for sidebar
+function createSidebarOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('shown');
+    overlay.classList.remove('active');
+  });
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+// Initialize mobile enhancements
+function initMobileEnhancements() {
+  const overlay = createSidebarOverlay();
+  
+  // Enhance sidebar toggle behavior
+  sidebar_buttons.forEach((el) => {
+    el.removeEventListener('click', null);
+    el.addEventListener('click', () => {
+      if (window.innerWidth < 640) {
+        if (sidebar.classList.contains('shown')) {
+          sidebar.classList.remove('shown');
+          overlay.classList.remove('active');
+        } else {
+          sidebar.classList.add('shown');
+          overlay.classList.add('active');
+        }
+      } else {
+        // Desktop behavior remains the same
+        if (sidebar.classList.contains('shown')) {
+          sidebar.classList.remove('shown');
+          sidebar.classList.add('minimized');
+        } else {
+          sidebar.classList.remove('minimized');
+          sidebar.classList.add('shown');
+        }
+      }
+    });
+  });
+  
+  // Add swipe gesture support
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  
+  document.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipeGesture();
+  }, { passive: true });
+  
+  function handleSwipeGesture() {
+    const swipeThreshold = 100;
+    
+    // Right swipe (from left edge) - open sidebar
+    if (touchEndX - touchStartX > swipeThreshold && touchStartX < 30) {
+      sidebar.classList.add('shown');
+      overlay.classList.add('active');
+    }
+    
+    // Left swipe - close sidebar
+    if (touchStartX - touchEndX > swipeThreshold && sidebar.classList.contains('shown')) {
+      sidebar.classList.remove('shown');
+      overlay.classList.remove('active');
+    }
+  }
+  
+  // Double tap to scroll to bottom
+  let lastTap = 0;
+  chatBody.addEventListener('touchend', e => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 300 && tapLength > 0) {
+      // Double tap detected
+      scroll_to_bottom();
+      e.preventDefault();
+    }
+    
+    lastTap = currentTime;
+  });
+  
+  // Improve file input experience on mobile
+  const fileLabels = document.querySelectorAll('.file-label');
+  fileLabels.forEach(label => {
+    label.addEventListener('touchstart', () => {
+      label.classList.add('active-touch');
+    });
+    
+    label.addEventListener('touchend', () => {
+      setTimeout(() => {
+        label.classList.remove('active-touch');
+      }, 200);
+    });
+  });
+}
+
+// Call this function after the DOM is loaded
+window.addEventListener('load', () => {
+  if (window.matchMedia('(max-width: 640px)').matches || window.matchMedia('(pointer: coarse)').matches) {
+    initMobileEnhancements();
+  }
+});
+
+// Handle orientation changes
+window.addEventListener('orientationchange', () => {
+  // Adjust UI based on new orientation
+  setTimeout(() => {
+    document.querySelector(".container").style.maxHeight = window.innerHeight + "px";
+    
+    // Adjust media content display
+    adjustMediaContentForOrientation();
+  }, 200);
+});
+
+// Adaptive Media Content Display
+
+// Function to adjust media content based on screen size and orientation
+function adjustMediaContentForOrientation() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const mediaElements = document.querySelectorAll('.message .content img, .message .content video');
+  
+  mediaElements.forEach(media => {
+    // Reset styles first
+    media.style.maxWidth = '';
+    media.style.maxHeight = '';
+    
+    // Get natural dimensions
+    const naturalWidth = media.naturalWidth || media.videoWidth || 400;
+    const naturalHeight = media.naturalHeight || media.videoHeight || 300;
+    const aspectRatio = naturalWidth / naturalHeight;
+    
+    if (isLandscape) {
+      // In landscape, prioritize height
+      media.style.maxHeight = '70vh';
+      media.style.maxWidth = '90vw';
+    } else {
+      // In portrait, limit width more strictly
+      media.style.maxWidth = '95vw';
+      media.style.maxHeight = '50vh';
+    }
+    
+    // Add special class for better display
+    media.classList.add('adaptive-media');
+  });
+}
+
+// Function to enhance image viewing experience
+function enhanceMobileImageViewing() {
+  // Improve image tap behavior
+  document.addEventListener('click', e => {
+    const target = e.target;
+    
+    // Check if clicked element is an image in a message
+    if (target.tagName === 'IMG' && target.closest('.message')) {
+      // Don't apply to avatar images
+      if (target.alt === 'your avatar') return;
+      
+      // Toggle fullscreen-like view
+      if (target.classList.contains('expanded-view')) {
+        target.classList.remove('expanded-view');
+      } else {
+        // Remove expanded view from any other images
+        document.querySelectorAll('.expanded-view').forEach(img => {
+          img.classList.remove('expanded-view');
+        });
+        
+        target.classList.add('expanded-view');
+      }
+    } else if (!target.closest('img.expanded-view')) {
+      // Close expanded view when clicking elsewhere
+      document.querySelectorAll('.expanded-view').forEach(img => {
+        img.classList.remove('expanded-view');
+      });
+    }
+  });
+}
+
+// Register these functions to run after content is loaded
+function registerMediaEnhancements() {
+  // Run initially
+  adjustMediaContentForOrientation();
+  enhanceMobileImageViewing();
+  
+  // Also run when new messages are added
+  const originalRegisterMessageImages = register_message_images;
+  register_message_images = function() {
+    originalRegisterMessageImages();
+    adjustMediaContentForOrientation();
+  };
+  
+  // And when window is resized
+  window.addEventListener('resize', adjustMediaContentForOrientation);
+}
+
+// Add this to the window load event
+window.addEventListener('load', registerMediaEnhancements);
+
+// Mobile Experience Initialization
+
+// Function to check if device is mobile
+function isMobileDevice() {
+  return window.matchMedia('(max-width: 640px)').matches || 
+         window.matchMedia('(pointer: coarse)').matches;
+}
+
+// Function to apply mobile-specific enhancements
+function applyMobileEnhancements() {
+  // Add mobile class to body for CSS targeting
+  document.body.classList.add('mobile-device');
+  
+  // Adjust height for mobile browsers (handles address bar)
+  function setMobileHeight() {
+    document.querySelector(".container").style.maxHeight = window.innerHeight + "px";
+    document.querySelector(".container").style.height = window.innerHeight + "px";
+  }
+  
+  setMobileHeight();
+  window.addEventListener('resize', setMobileHeight);
+  
+  // Improve scroll behavior
+  const chatBody = document.getElementById('chatBody');
+  chatBody.style.overscrollBehavior = 'contain';
+  
+  // Enhance touch feedback for all interactive elements
+  const touchElements = document.querySelectorAll('button, .file-label, .micro-label, select, .convo');
+  touchElements.forEach(el => {
+    el.addEventListener('touchstart', () => {
+      el.classList.add('active-touch');
+    }, { passive: true });
+    
+    el.addEventListener('touchend', () => {
+      setTimeout(() => {
+        el.classList.remove('active-touch');
+      }, 200);
+    }, { passive: true });
+  });
+  
+  // Optimize input field behavior
+  const userInput = document.getElementById('userInput');
+  userInput.addEventListener('focus', () => {
+    // Small delay to ensure keyboard is open
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+    }, 300);
+  });
+  
+  // Show/hide floating action button based on scroll position
+  let lastScrollTop = 0;
+  const floatingButton = document.querySelector('.new_convo_icon.mobile-only');
+  if (floatingButton) {
+    chatBody.addEventListener('scroll', () => {
+      const st = chatBody.scrollTop;
+      if (st > lastScrollTop && st > 100) {
+        // Scrolling down - hide button
+        floatingButton.style.transform = 'translateY(80px)';
+      } else {
+        // Scrolling up - show button
+        floatingButton.style.transform = 'translateY(0)';
+      }
+      lastScrollTop = st;
+    }, { passive: true });
+  }
+}
+
+// Initialize mobile enhancements if on mobile device
+document.addEventListener('DOMContentLoaded', () => {
+  if (isMobileDevice()) {
+    applyMobileEnhancements();
+    initMobileEnhancements(); // From previous code
+  }
+  
+  // Add CSS class based on orientation
+  function updateOrientationClass() {
+    if (window.innerWidth > window.innerHeight) {
+      document.body.classList.add('landscape');
+      document.body.classList.remove('portrait');
+    } else {
+      document.body.classList.add('portrait');
+      document.body.classList.remove('landscape');
+    }
+  }
+  
+  updateOrientationClass();
+  window.addEventListener('resize', updateOrientationClass);
+  window.addEventListener('orientationchange', updateOrientationClass);
+});
