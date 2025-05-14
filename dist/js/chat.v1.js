@@ -1233,6 +1233,36 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         regenerate_button.classList.remove("regenerate-hidden");
     }
     if (provider == "Puter") {
+        if (model == "dall-e-3") {
+            if (!message) {
+                message = messages[messages.length-1].content;
+            }
+            puter.ai.txt2img(message, false).then(async (image)=>{
+                let dirName = puter.randName();
+                let fileName = puter.randName();
+                await puter.fs.mkdir(dirName);
+                let site;
+                try {
+                    site = await puter.hosting.create(dirName, dirName);
+                } catch {
+                    site = await puter.hosting.get(dirName);
+                }
+                await puter.fs.write(`${dirName}/${fileName}`, await fetch(image.src).then((response) => response.blob()));
+                const url = `https://${site.subdomain}.puter.site/${fileName}`;
+                await add_message(
+                    window.conversation_id,
+                    "assistant",
+                    `[![${message.replaceAll('\n', ' ')}](${url})](${url})`,
+                    null,
+                    message_index,
+                );
+                await load_conversation(await get_conversation(conversation_id));
+                stop_generating.classList.add("stop_generating-hidden");
+                load_conversations();
+                hide_sidebar();
+            })
+            return;
+        }
         puter.ai.chat(messages=messages, options={"model": model}, testMode=false)
             .then(async (response) => {
                 await add_message(
@@ -3252,6 +3282,7 @@ async function load_provider_models(provider=null) {
     <option value="codestral-latest">codestral-latest</option>
     <option value="google/gemma-2-27b-it">google/gemma-2-27b-it</option>
     <option value="grok-beta">grok-beta</option>
+    <option value="dall-e-3">dall-e-3 (${modelTags.image})</option>
   </optgroup>`;
         return;
     }
