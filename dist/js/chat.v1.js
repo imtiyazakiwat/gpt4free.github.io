@@ -273,51 +273,84 @@ function generateUUID() {
 }
 
 function register_message_images() {
-    chatBody.querySelectorAll(`.loading-indicator`).forEach((el) => el.remove());
-    chatBody.querySelectorAll(`.message img:not([alt="your avatar"])`).forEach(async (el) => {
-        if (!el.complete) {
-            const indicator = document.createElement("span");
-            indicator.classList.add("loading-indicator");
-            indicator.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
-            el.parentElement.appendChild(indicator);
-            el.onerror = () => {
-                let indexCommand;
-                if ((indexCommand = el.src.indexOf("/generate/")) >= 0) {
-                    reloadConversation = false;
-                    indexCommand = indexCommand + "/generate/".length + 1;
-                    let newPath = el.src.substring(indexCommand)
-                    let filename = newPath.replace(/(?:\?.+?|$)/, "");
-                    let seed = Math.floor(Date.now() / 1000);
-                    newPath = `https://image.pollinations.ai/prompt/${newPath}?seed=${seed}&nologo=true`;
-                    let downloadUrl = newPath;
-                    if (document.getElementById("download_media")?.checked) {
-                        downloadUrl = `/images/${filename}?url=${escapeHtml(newPath)}`;
-                    }
-                    const link = document.createElement("a");
-                    link.setAttribute("href", newPath);
-                    const newImg = document.createElement("img");
-                    newImg.src = downloadUrl;
-                    newImg.alt = el.alt;
-                    newImg.onload = () => {
-                        lazy_scroll_to_bottom();
-                        indicator.remove();
-                    }
-                    link.appendChild(newImg);
-                    el.parentElement.appendChild(link);
-                } else {
-                    const span = document.createElement("span");
-                    span.innerHTML = `<i class="fa-solid fa-plug"></i>${escapeHtml(el.alt)}`;
-                    el.parentElement.appendChild(span);
-                }
-                el.remove();
-                indicator.remove();
-            }
-            el.onload = () => {
-                indicator.remove();
-                lazy_scroll_to_bottom();
-            }
+    chatBody.querySelectorAll(".message .fa-clipboard").forEach(async (el) => {
+        if (el.dataset.click) {
+            return
         }
+        el.dataset.click = true;
+        el.addEventListener("click", async () => {
+            let message_el = get_message_el(el);
+            let response = await fetch(message_el.dataset.object_url);
+            let copyText = await response.text();
+            
+            try {        
+                if (!navigator.clipboard) {
+                    throw new Error("navigator.clipboard: Clipboard API unavailable.");
+                }
+                await navigator.clipboard.writeText(copyText);
+                showNotification("Text copied to clipboard");
+            } catch (e) {
+                console.error(e);
+                console.error("Clipboard API writeText() failed! Fallback to document.exec(\"copy\")...");
+                try {
+                    fallback_clipboard(copyText);
+                    showNotification("Text copied to clipboard");
+                } catch (fallbackError) {
+                    console.error("Fallback clipboard also failed:", fallbackError);
+                    showNotification("Failed to copy text", "error");
+                }
+            }
+            el.classList.add("clicked");
+            setTimeout(() => el.classList.remove("clicked"), 1000);
+        });
     });
+}
+
+function showNotification(message, type = 'success') {
+    // Check if notification container exists, create if not
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.padding = '10px 20px';
+    notification.style.marginTop = '10px';
+    notification.style.borderRadius = '4px';
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#F44336';
+    notification.style.color = 'white';
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(20px)';
+    notification.style.transition = 'opacity 0.3s, transform 0.3s';
+    
+    container.appendChild(notification);
+    
+    // Show notification with animation
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+        
+        // Hide and remove after delay
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                container.removeChild(notification);
+                if (container.children.length === 0) {
+                    document.body.removeChild(container);
+                }
+            }, 300);
+        }, 2000);
+    }, 10);
 }
 
 const register_message_buttons = async () => {
@@ -2242,7 +2275,13 @@ function count_words_and_tokens(text, model, completion_tokens, prompt_tokens) {
 }
 
 function update_message(content_map, message_id, content = null, scroll = true) {
+    // Clear previous timeouts
+    content_map.update_timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+    content_map.update_timeouts = [];
+    
+    // Create new timeout
     content_map.update_timeouts.push(setTimeout(() => {
+        // Existing function body
         if (!content) {
             if (reasoning_storage[message_id] && message_storage[message_id]) {
                 content = render_reasoning(reasoning_storage[message_id], true) + markdown_render(message_storage[message_id]);
@@ -2251,6 +2290,8 @@ function update_message(content_map, message_id, content = null, scroll = true) 
             } else {
                 content = markdown_render(message_storage[message_id]);
             }
+            
+            // Find last element for cursor placement
             let lastElement, lastIndex = null;
             for (element of ['</p>', '</code></pre>', '</p>\n</li>\n</ol>', '</li>\n</ol>', '</li>\n</ul>']) {
                 const index = content.lastIndexOf(element)
@@ -2263,24 +2304,62 @@ function update_message(content_map, message_id, content = null, scroll = true) 
                 content = content.substring(0, lastIndex) + '<span class="cursor"></span>' + lastElement;
             }
         }
+        
         if (error_storage[message_id]) {
             content += markdown_render(`${window.translate('**An error occured:**')} ${error_storage[message_id]}`);
         }
-        content_map.inner.innerHTML = content;
+        
+        // Use progressive rendering for large content
+        if (content.length > 10000) {
+            renderLargeMessage(content_map.inner, content);
+        } else {
+            content_map.inner.innerHTML = content;
+        }
+        
         if (countTokensEnabled) {
             content_map.count.innerText = count_words_and_tokens(
                 (reasoning_storage[message_id] ? reasoning_storage[message_id].text : "")
                 + message_storage[message_id],
                 provider_storage[message_id]?.model);
         }
+        
         highlight(content_map.inner);
         if (scroll) {
             lazy_scroll_to_bottom();
         }
-        content_map.update_timeouts.forEach((timeoutId)=>clearTimeout(timeoutId));
-        content_map.update_timeouts = [];
     }, 100));
 };
+
+function renderLargeMessage(container, content, chunkSize = 5000) {
+    if (content.length <= chunkSize) {
+        container.innerHTML = content;
+        return;
+    }
+    
+    // Split content into chunks
+    const chunks = [];
+    for (let i = 0; i < content.length; i += chunkSize) {
+        chunks.push(content.substring(i, i + chunkSize));
+    }
+    
+    // Render chunks progressively
+    let index = 0;
+    container.innerHTML = chunks[0];
+    
+    const renderNextChunk = () => {
+        index++;
+        if (index < chunks.length) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = chunks[index];
+            while (tempDiv.firstChild) {
+                container.appendChild(tempDiv.firstChild);
+            }
+            setTimeout(renderNextChunk, 10);
+        }
+    };
+    
+    setTimeout(renderNextChunk, 10);
+}
 
 let countFocus = userInput;
 const count_input = async () => {
@@ -3861,6 +3940,40 @@ function setupDragAndDrop() {
         e.stopPropagation();
         chatBody.classList.remove('drag-highlight');
     });
+    
+    // NEW: Add a click handler to hide the drop zone when clicked outside
+    dropZone.addEventListener('click', (e) => {
+        if (e.target === dropZone) {
+            dropZone.classList.remove('active');
+            dropZone.classList.remove('drag-over');
+            chatBody.classList.remove('drag-highlight');
+        }
+    });
+    
+    // NEW: Add a global escape key handler to hide the drop zone
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            dropZone.classList.remove('active');
+            dropZone.classList.remove('drag-over');
+            chatBody.classList.remove('drag-highlight');
+        }
+    });
+    
+    // NEW: Force hide drop zone when window loses focus
+    window.addEventListener('blur', () => {
+        dropZone.classList.remove('active');
+        dropZone.classList.remove('drag-over');
+        chatBody.classList.remove('drag-highlight');
+    });
+    
+    // NEW: Add a safety cleanup function that runs periodically
+    setInterval(() => {
+        // If no drag is happening but the zone is still active, hide it
+        if (!document.querySelector('.drag-highlight') && dropZone.classList.contains('active')) {
+            dropZone.classList.remove('active');
+            dropZone.classList.remove('drag-over');
+        }
+    }, 2000);
 }
 
 // Initialize drag and drop

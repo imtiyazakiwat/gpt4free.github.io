@@ -6,7 +6,7 @@ This document outlines how to use the G4F (Generative Framework) library to gene
 
 ### 1. **Audio Generation and Transcription**
 
-G4F supports audio generation through providers like PollinationsAI and audio transcription using providers like Microsoft_Phi_4.
+G4F supports audio generation through providers like PollinationsAI and audio transcription using providers like Microsoft_Phi_4_Multimodal.
 
 #### **Generate Audio with PollinationsAI:**
 
@@ -72,7 +72,7 @@ from g4f.client import AsyncClient
 import g4f.Provider
 
 async def main():
-    client = AsyncClient(provider=g4f.Provider.Microsoft_Phi_4)
+    client = AsyncClient(provider=g4f.Provider.Microsoft_Phi_4_Multimodal)
 
     with open("audio.wav", "rb") as audio_file:
         response = await client.chat.completions.create(
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 ```
 
 #### Explanation
-- **Client Initialization**: An `AsyncClient` instance is created with a provider that supports audio inputs, such as `PollinationsAI` or `Microsoft_Phi_4`.
+- **Client Initialization**: An `AsyncClient` instance is created with a provider that supports audio inputs, such as `PollinationsAI` or `Microsoft_Phi_4_Multimodal`.
 - **File Handling**: The audio file (`audio.wav`) is opened in binary read mode (`"rb"`) using a context manager (`with` statement) to ensure proper file closure after use.
 - **API Call**: The `chat.completions.create` method is called with:
   - `messages`: Containing a user message instructing the model to transcribe the audio.
@@ -97,7 +97,7 @@ if __name__ == "__main__":
 - **Response**: The transcription is extracted from `response.choices[0].message.content` and printed.
 
 #### Notes
-- **Provider Support**: Ensure the chosen provider (e.g., `PollinationsAI` or `Microsoft_Phi_4`) supports audio inputs in chat completions. Not all providers may offer this functionality.
+- **Provider Support**: Ensure the chosen provider (e.g., `PollinationsAI` or `Microsoft_Phi_4_Multimodal`) supports audio inputs in chat completions. Not all providers may offer this functionality.
 - **File Path**: Replace `"audio.wav"` with the path to your own audio file. The file format (e.g., WAV) should be compatible with the provider.
 - **Model Selection**: If `g4f.models.default` does not support audio transcription, you may need to specify a model that does (consult the provider's documentation for supported models).
 

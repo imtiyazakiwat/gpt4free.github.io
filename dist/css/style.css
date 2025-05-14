@@ -2170,3 +2170,136 @@ form textarea {
     height: 32px;
   }
 }
+
+/* 2. Optimize element sizing for small screens */
+@media only screen and (max-width: 640px) {
+    .message .user, 
+    .message .assistant {
+        max-width: 36px;
+        max-height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+    }
+    
+    .message .user img,
+    .message .assistant img {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .chat-top-panel .convo-title {
+        font-size: 14px;
+        max-width: 60%;
+    }
+    
+    #userInput {
+        min-height: 60px;
+        max-height: 120px;
+    }
+    
+    .message {
+        padding: 10px 8px;
+        gap: 8px;
+    }
+    
+    .message .content {
+        width: calc(100% - 44px);
+    }
+}
+
+/* 3. Improve media handling on mobile */
+@media only screen and (max-width: 480px) {
+    .message .content img, 
+    .message .content video {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .chat-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .send-buttons {
+        width: 100%;
+    }
+    
+    select, input.model {
+        width: 120px;
+    }
+    
+    .field {
+        padding-right: 4px;
+    }
+}
+
+/* 4. Fix for message layout in portrait mobile view */
+@media only screen and (max-width: 640px) and (orientation: portrait) {
+    .message {
+        display: flex;
+        flex-direction: row;
+        padding: 10px 8px;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .message .content_inner {
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .message .count {
+        font-size: 10px;
+        margin-top: 4px;
+    }
+}
+
+/* 5. Add notification styles */
+#notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.notification {
+    padding: 10px 20px;
+    margin-top: 10px;
+    border-radius: 4px;
+    color: white;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #F44336;
+}
+
+/* 7. Fix sidebar on mobile */
+@media only screen and (max-width: 640px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1001;
+        height: 100vh;
+        background: var(--background);
+        transition: transform 0.3s ease, width 0.3s ease;
+        transform: translateX(-100%);
+        width: 85%;
+        max-width: 300px;
+        top: 0;
+        left: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    
+    .sidebar.shown {
+        transform: translateX(0);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A conversational AI system that listens, learns, and challenges">
     <meta property="og:title" content="ChatGPT">
     <meta property="og:image" content="https://openai.com/content/images/2022/11/ChatGPT.jpg">
@@ -17,7 +17,7 @@
     <link rel="manifest" href="../dist/img/site.webmanifest">
     <script src="../dist/js/framework.js"></script>
     <script src="../dist/js/chat.v1.js" defer></script>
-    <script src="../dist/js/highlightjs-copy.min.js"></script>
+    <script src="../dist/js/highlightjs-copy.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
     <link rel="stylesheet" href="../dist/css/dracula.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe/dist/photoswipe.css">
@@ -317,13 +317,13 @@
                             <i class="fa-solid fa-code"></i>
                         </button>
                         <div class="send-buttons">
-                            <button id="addButton">
-                                <i class="fa-solid fa-square-plus"></i>
+                            <button id="addButton" aria-label="Add message">
+                                <i class="fa-solid fa-square-plus" aria-hidden="true"></i>
                                 <span>Add</span>
                             </button>
-                            <button id="sendButton">
-                                <i class="fa-regular fa-paper-plane"></i>
-                                <a href="" id="download" class="hidden"></a>
+                            
+                            <button id="sendButton" aria-label="Send message">
+                                <i class="fa-regular fa-paper-plane" aria-hidden="true"></i>
                                 <span>Send</span>
                             </button>
                         </div>
