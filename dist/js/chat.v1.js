@@ -104,7 +104,7 @@ if (window.markdownit) {
                     size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
                     return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
                 }
-                if (item.name.endsWith(".wav") || item.name.endsWith(".mp3") || item.name.endsWith(".m4a")) {
+                if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
                     return `<audio controls src="${item.url}"></audio>`;
                 }
                 if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
@@ -1233,21 +1233,21 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         regenerate_button.classList.remove("regenerate-hidden");
     }
     if (provider == "Puter") {
-        puter.ai.chat(messages=messages, options={"model": model}, testMode=true)
+        puter.ai.chat(messages=messages, options={"model": model}, testMode=false)
             .then(async (response) => {
                 await add_message(
                     window.conversation_id,
                     "assistant",
-                    response,
+                    response.message.content[0].text,
                     null,
                     message_index,
                 );
                 await load_conversation(await get_conversation(conversation_id));
                 stop_generating.classList.add("stop_generating-hidden");
-                play_last_message(scroll, response);
                 load_conversations();
                 hide_sidebar();             
             });
+        return;
     } else if (provider == "Live") {
         async function generate_text(prompt, model) {
             let seed = regenerate ? Math.floor(Date.now() / 1000) : "";
@@ -2679,6 +2679,7 @@ async function on_api() {
             <option value="OpenaiChat">OpenAI Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
             <option value="Live">Pollinations AI (live)</option>
+            <option value="Puter">Puter.js AI (live)</option>
             <option value="Cloudflare">Cloudflare</option>
             <option value="Copilot">Microsoft Copilot</option>
             <option value="PerplexityLabs">Perplexity Labs</option>
@@ -3208,6 +3209,51 @@ async function load_provider_models(provider=null) {
     }
     if (provider == "Live") {
         await load_fallback_models();
+        return;
+    } else if (provider == "Puter") {
+        modelProvider.classList.add("hidden");
+        modelSelect.classList.remove("hidden");
+        custom_model.classList.add("hidden");
+        modelSelect.innerHTML = `<optgroup label="GPT Models">
+    <option value="gpt-4o-mini" selected>gpt-4o-mini (default)</option>
+    <option value="gpt-4o">gpt-4o</option>
+    <option value="gpt-4.1">gpt-</option>
+    <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+    <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+    <option value="gpt-4.5-preview">gpt-4.5-preview</option>
+  </optgroup>
+  <optgroup label="O Models">
+    <option value="o1">o1</option>
+    <option value="o1-mini">o1-mini</option>
+    <option value="o1-pro">o1-pro</option>
+    <option value="o3">o3</option>
+    <option value="o3-mini">o3-mini</option>
+    <option value="o4-mini">o4-mini</option>
+  </optgroup>
+  <optgroup label="Claude Models">
+    <option value="claude-3-7-sonnet">claude-3-7-sonnet</option>
+    <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
+  </optgroup>
+  <optgroup label="Deepseek Models">
+    <option value="deepseek-chat">deepseek-chat</option>
+    <option value="deepseek-reasoner">deepseek-reasoner</option>
+  </optgroup>
+  <optgroup label="Gemini Models">
+    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+    <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+  </optgroup>
+  <optgroup label="Meta Llama Models">
+    <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo</option>
+    <option value="meta-llama/Meta-Llama--70B-Instruct-Turbo">meta-llama/Meta-Llama--70B-Instruct-Turbo</option>
+    <option value="meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo">meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo</option>
+  </optgroup>
+  <optgroup label="Other Models">
+    <option value="mistral-large-latest">mistral-large-latest</option>
+    <option value="pixtral-large-latest">pixtral-large-latest</option>
+    <option value="codestral-latest">codestral-latest</option>
+    <option value="google/gemma-2-27b-it">google/gemma-2-27b-it</option>
+    <option value="grok-beta">grok-beta</option>
+  </optgroup>`;
         return;
     }
     if (!custom_model.value) {
