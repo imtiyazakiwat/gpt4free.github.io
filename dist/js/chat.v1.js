@@ -2676,7 +2676,7 @@ async function on_api() {
             <option value="ARTA">ARTA Provider</option>
             <option value="DeepSeekAPI">DeepSeek Provider</option>
             <option value="Grok">Grok Provider</option>
-            <option value="OpenaiChat">OpenAI Provider</option>
+            <option value="OpenaiChat">ChatGPT Provider</option>
             <option value="PollinationsAI">Pollinations AI</option>
             <option value="Live">Pollinations AI (live)</option>
             <option value="Puter">Puter.js AI (live)</option>
@@ -2688,7 +2688,6 @@ async function on_api() {
             <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
             <option value="HuggingSpace">HuggingSpace</option>
             <option value="HuggingChat">HuggingChat</option>`;
-        document.getElementById("pin").disabled = true;
         document.getElementById("refine")?.parentElement.classList.add("hidden")
         const track_usage = document.getElementById("track_usage");
         track_usage.checked = true;

@@ -2220,11 +2220,7 @@ form textarea {
         justify-content: center;
         gap: 5px;
     }
-    
-    .send-buttons {
-        width: 100%;
-    }
-    
+
     select, input.model {
         width: 120px;
     }
