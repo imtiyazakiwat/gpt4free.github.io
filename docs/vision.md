@@ -84,4 +84,4 @@ In this example:
 
 ---
 
-[Return to Documentation](/docs/)
+[Return to Documentation](/)
