@@ -342,7 +342,7 @@ body:not(.white) a:visited{
 }
 
 .message .reasoning_text.final {
-    max-height: 2000px;
+    max-height: 5000px;
     transition: max-height 0.25s ease-in;
 }
 

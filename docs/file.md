@@ -203,4 +203,145 @@ To incorporate file uploads into your client applications, include the `bucket` 
 
 ---
 
+## 📄 MarkItDown – Lightweight File-to-Text API (Alternative to G4F File API)
+
+`markitdown` is a simple and lightweight alternative to the G4F File API for extracting **plain or markdown-formatted text** from uploaded files. While the G4F File API supports bucket-based multi-file workflows and streaming, `markitdown` is ideal for **quick, direct conversion of individual files** (e.g. `.md`, `.pdf`, `.docx`, etc.).
+
+### ✅ Key Features
+
+- 🔄 Converts a wide range of files (Markdown, PDF, DOCX, TXT, AUDIO, etc.) to markdown/plain text.
+- 📤 Simple POST API: Send a file, receive extracted text.
+- ⚡ Fast, no bucket, SSE, or URL fetch needed.
+- 🎯 Ideal for use-cases where full document text is needed inline in chat prompts.
+
+---
+
+### 📦 Installation
+
+```bash
+pip install markitdown[all]
+```
+
+---
+
+### 🐍 Example Usage (Python)
+
+```python
+import requests
+
+def convert_with_markitdown(file_path):
+    with open(file_path, 'rb') as file:
+        response = requests.post('http://localhost:8080/api/markitdown', files={'file': file})
+        if response.status_code == 200:
+            data = response.json()
+            return data['text']
+        else:
+            raise Exception(f"Conversion failed: {response.status_code} - {response.text}")
+
+# Usage
+text = convert_with_markitdown('example.md')
+print(text)
+```
+
+---
+
+### 🌐 Example Usage (JavaScript)
+
+```html
+<input type="file" id="fileInput" />
+
+<script>
+async function convertToMarkdown(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('http://localhost:8080/api/markitdown', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        console.log("Converted Text:", data.text);
+
+        // You can now inject data.text into a prompt or display in the UI.
+    } catch (error) {
+        console.error('Conversion failed:', error);
+    }
+}
+
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) await convertToMarkdown(file);
+});
+</script>
+```
+
+---
+
+### 💬 Integration with ChatCompletion
+
+Once you retrieve `text` from `markitdown`, you can insert it into your LLM prompt as inline content:
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "<text_from_markitdown>" },
+        { "type": "text", "text": "Answer this question using the above content: ...your question..." }
+      ]
+    }
+  ]
+}
+```
+
+Example in Python:
+
+```python
+response = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": text},
+                {"type": "text", "text": "Summarize this document."}
+            ]
+        }
+    ]
+)
+```
+
+---
+
+### 🔄 G4F File API vs MarkItDown
+
+| Feature                        | G4F File API                        | MarkItDown API                |
+|-------------------------------|-------------------------------------|-------------------------------|
+| Upload Files                  | ✅ Yes                              | ✅ Yes                        |
+| Web URL Downloads             | ✅ Yes via `downloads.json`         | ❌ No                         |
+| SSE Progress Streaming        | ✅ Yes                              | ❌ No                         |
+| Markdown/Text Output          | Raw/structured                      | Clean markdown/plain text     |
+| Bucket/File Management        | ✅ Multi-file                        | ❌ Single-file only           |
+| Use Case                      | Multi-step pipelines, large workflows | Quick extraction, inline usage |
+
+---
+
+### 📌 Summary
+
+- Use **G4F File API** when:
+  - You need to upload/download many files.
+  - You want streamed SSE progress.
+  - You're building a multi-step or large workflow.
+
+- Use **MarkItDown** when:
+  - You want quick markdown/plain text extraction from a single file.
+  - You plan to inject the text directly into an LLM prompt.
+  - You prefer a simple one-call API.
+
+---
+
 [Return to Documentation](/)

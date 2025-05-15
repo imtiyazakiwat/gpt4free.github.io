@@ -42,11 +42,13 @@ const translationSnipptes = [
     "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)", "Get API key"];
 
 let login_urls_storage = {
-    "HuggingFace": ["HuggingFace", "https://huggingface.co/settings/tokens", ["HuggingFaceMedia"]],
+    "HuggingFace": ["HuggingFace", "https://huggingface.co/settings/tokens", ["HuggingFaceMedia", "AnyProvider"]],
     "HuggingSpace": ["HuggingSpace", "", []],
 };
 
-modelTags = {
+let hasPuter = false;
+
+const modelTags = {
     image: "📸 Image Generation",
     vision: "👓 Image Upload",
     audio: "🎧 Audio Generation",
@@ -94,10 +96,13 @@ appStorage = window.localStorage || {
 let markdown_render = (content) => escapeHtml(content);
 if (window.markdownit) {
     const markdown = window.markdownit({
+        html: window.sanitizeHtml ? true : false,
         breaks: true,
-        linkify: true
     });
     markdown_render = (content) => {
+        if (!content) {
+            return "";
+        }
         if (Array.isArray(content)) {
             content = content.map((item) => {
                 if (!item.name) {
@@ -114,19 +119,30 @@ if (window.markdownit) {
             }).join("\n");
         }
         content = content.replaceAll(/<!-- generated images start -->|<!-- generated images end -->/gm, "")
-        return markdown.render(content)
+        content = markdown.render(content)
             .replaceAll("<a href=", '<a target="_blank" href=')
             .replaceAll('<code>', '<code class="language-plaintext">')
-            .replaceAll('&lt;i class=&quot;', '<i class="')
-            .replaceAll('&quot;&gt;&lt;/i&gt;', '"></i>')
-            .replaceAll('&lt;video controls src=&quot;', '<video loop autoplay controls muted src="')
-            .replaceAll('&quot;&gt;&lt;/video&gt;', '"></video>')
-            .replaceAll('&lt;audio controls src=&quot;', '<audio controls src="')
-            .replaceAll('&quot;&gt;&lt;/audio&gt;', '"></audio>')
-            .replaceAll('&lt;iframe src=&quot;', '<iframe frameborder="0" height="400" width="400" src="')
-            .replaceAll('&lt;iframe type=&quot;text/html&quot; src=&quot;', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
-            .replaceAll('&quot;&gt;&lt;/iframe&gt;', `?enablejsapi=1"></iframe>`)
+            .replaceAll('<video controls src="', '<video loop autoplay controls muted src="')
+            .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
+            .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
+            .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
             .replaceAll('src="/', `src="${window.backendUrl}/`)
+        if (window.sanitizeHtml) {
+            content = window.sanitizeHtml(content, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'audio', 'video']),
+                allowedAttributes: {
+                    a: [ 'href', 'title', 'target' ],
+                    i: [ 'class' ],
+                    code: [ 'class' ],
+                    img: [ 'src', 'alt' ],
+                    iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
+                    audio: [ 'src', 'controls' ],
+                    video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
+                },
+                allowedIframeHostnames: ['www.youtube.com']
+            });
+        }
+        return content;
     }
 }
 
@@ -137,7 +153,7 @@ function render_reasoning(reasoning, final = false) {
     return `<div class="reasoning_body">
         <div class="reasoning_title">
            <strong>${reasoning.label ? reasoning.label :'Reasoning <i class="brain">🧠</i>'}: </strong>
-           ${reasoning.status ? escapeHtml(reasoning.status) : '<i class="fas fa-spinner fa-spin"></i>'}
+           ${typeof reasoning.status === 'string' || reasoning.status instanceof String ? escapeHtml(reasoning.status) : '<i class="fas fa-spinner fa-spin"></i>'}
         </div>
         ${inner_text}
     </div>`;
@@ -148,7 +164,7 @@ function render_reasoning_text(reasoning) {
 }
 
 function filter_message(text) {
-    if (Array.isArray(text)) {
+    if (Array.isArray(text) || !text) {
         return text;
     }
     return filter_message_content(text.replaceAll(
@@ -157,16 +173,10 @@ function filter_message(text) {
 }
 
 function filter_message_content(text) {
-    if (Array.isArray(text)) {
+    if (Array.isArray(text) || !text) {
         return text;
     }
     return text.replace(/ \[aborted\]$/g, "").replace(/ \[error\]$/g, "")
-}
-
-function filter_message_image(text) {
-    return text.replaceAll(
-        /\]\(\/generate\//gm, "](/images/"
-    )
 }
 
 function fallback_clipboard (text) {
@@ -1160,7 +1170,8 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             // Calculate usage if we don't have it jet
             if (countTokensEnabled && document.getElementById("track_usage").checked && !usage.prompt_tokens && window.GPTTokenizer_cl100k_base) {
                 const prompt_token_model = model?.startsWith("gpt-3") ? "gpt-3.5-turbo" : "gpt-4"
-                const prompt_tokens = GPTTokenizer_cl100k_base?.encodeChat(messages, prompt_token_model).length;
+                const filtered = messages.filter((item)=>!Array.isArray(item.content) && item.content);
+                const prompt_tokens = GPTTokenizer_cl100k_base?.encodeChat(filtered, prompt_token_model).length;
                 const completion_tokens = count_tokens(message_provider?.model, message_storage[message_id])
                     + (reasoning_storage[message_id] ? count_tokens(message_provider?.model, reasoning_storage[message_id].text) : 0);
                 usage = {
@@ -1183,7 +1194,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             await add_message(
                 window.conversation_id,
                 "assistant",
-                filter_message_image(final_message),
+                final_message,
                 message_provider,
                 message_index,
                 synthesize_storage[message_id],
@@ -1268,9 +1279,15 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                 await add_message(
                     window.conversation_id,
                     "assistant",
-                    response.message.content[0].text,
+                    response.message.content,
                     null,
                     message_index,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    {text: response.message.reasoning_content, status: ""}
                 );
                 await load_conversation(await get_conversation(conversation_id));
                 stop_generating.classList.add("stop_generating-hidden");
@@ -1692,7 +1709,7 @@ const load_conversation = async (conversation, scroll=true) => {
         // Find buttons to add
         actions = ["variant"]
         // Add continue button if possible
-        if (item.role == "assistant" && !Array.isArray(buffer)) {
+        if (buffer && item.role == "assistant" && !Array.isArray(buffer)) {
             let reason = "stop";
             // Read finish reason from conversation
             if (item.finish && item.finish.reason) {
@@ -1796,7 +1813,7 @@ const load_conversation = async (conversation, scroll=true) => {
         suggestions = null;
     } else if (countTokensEnabled && window.GPTTokenizer_cl100k_base) {
         let filtered = prepare_messages(messages, null, true, false);
-        filtered = filtered.filter((item)=>!Array.isArray(item.content));
+        filtered = filtered.filter((item)=>!Array.isArray(item.content) && item.content);
         if (filtered.length > 0) {
             last_model = last_model?.startsWith("gpt-3") ? "gpt-3.5-turbo" : "gpt-4"
             let count_total = GPTTokenizer_cl100k_base?.encodeChat(filtered, last_model).length
@@ -2159,7 +2176,7 @@ function open_settings() {
     } else {
         settings.classList.add("hidden");
         chat.classList.remove("hidden");
-        history.back();
+        add_url_to_history(window.conversation_id ? `#${window.conversation_id}` : window.location.search);
     }
     log_storage.classList.add("hidden");
 }
@@ -2297,7 +2314,7 @@ function count_chars(text) {
 }
 
 function count_words_and_tokens(text, model, completion_tokens, prompt_tokens) {
-    if (Array.isArray(text)) {
+    if (Array.isArray(text) || !text) {
         return "";
     }
     text = filter_message(text);
@@ -3239,51 +3256,6 @@ async function load_provider_models(provider=null) {
     if (provider == "Live") {
         await load_fallback_models();
         return;
-    } else if (provider == "Puter") {
-        modelProvider.classList.add("hidden");
-        modelSelect.classList.remove("hidden");
-        custom_model.classList.add("hidden");
-        modelSelect.innerHTML = `<optgroup label="GPT Models">
-    <option value="gpt-4o-mini" selected>gpt-4o-mini (default)</option>
-    <option value="gpt-4o">gpt-4o</option>
-    <option value="gpt-4.1">gpt-4.1</option>
-    <option value="gpt-4.1-mini">gpt-4.1-mini</option>
-    <option value="gpt-4.1-nano">gpt-4.1-nano</option>
-    <option value="gpt-4.5-preview">gpt-4.5-preview</option>
-  </optgroup>
-  <optgroup label="O Models">
-    <option value="o1">o1</option>
-    <option value="o1-mini">o1-mini</option>
-    <option value="o1-pro">o1-pro</option>
-    <option value="o3">o3</option>
-    <option value="o3-mini">o3-mini</option>
-    <option value="o4-mini">o4-mini</option>
-  </optgroup>
-  <optgroup label="Claude Models">
-    <option value="claude-3-7-sonnet">claude-3-7-sonnet</option>
-    <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
-  </optgroup>
-  <optgroup label="Deepseek Models">
-    <option value="deepseek-chat">deepseek-chat</option>
-    <option value="deepseek-reasoner">deepseek-reasoner</option>
-  </optgroup>
-  <optgroup label="Gemini Models">
-    <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-    <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-  </optgroup>
-  <optgroup label="Meta Llama Models">
-    <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo</option>
-    <option value="meta-llama/Meta-Llama--70B-Instruct-Turbo">meta-llama/Meta-Llama--70B-Instruct-Turbo</option>
-    <option value="meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo">meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo</option>
-  </optgroup>
-  <optgroup label="Other Models">
-    <option value="mistral-large-latest">mistral-large-latest</option>
-    <option value="pixtral-large-latest">pixtral-large-latest</option>
-    <option value="codestral-latest">codestral-latest</option>
-    <option value="google/gemma-2-27b-it">google/gemma-2-27b-it</option>
-    <option value="grok-beta">grok-beta</option>
-  </optgroup>`;
-        return;
     }
     if (!custom_model.value) {
         custom_model.classList.add("hidden");
@@ -3307,33 +3279,61 @@ async function load_provider_models(provider=null) {
         }
         return;
     }
+    if (provider == "Puter" && !hasPuter) {
+        var tag = document.createElement('script');
+        tag.src = "https://js.puter.com/v2/";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        hasPuter = true;
+    }
     const models = await api('models', provider);
-    if (models && models.length > 0) {
+    if (models) {
         modelSelect.classList.add("hidden");
         if (!custom_model.value) {
             custom_model.classList.add("hidden");
             modelProvider.classList.remove("hidden");
         }
         let defaultIndex = 0;
-        models.forEach((model, i) => {
-            let option = document.createElement('option');
-            option.value = model.model;
-            option.dataset.label = model.model;
-            option.text = model.model + (model.count > 1 ? ` (${model.count}+)` : "") + get_modelTags(model);
-
-            if (model.task) {
-                option.text += ` (${model.task})`;
+        function add_options(group, models) {
+            models.forEach((model, i) => {
+                if (!model.models) {
+                    let option = document.createElement('option');
+                    option.value = model.model;
+                    option.dataset.label = model.model;
+                    option.text = model.label + (model.count > 1 ? ` (${model.count}+)` : "") + get_modelTags(model);
+                    group.appendChild(option);
+                    if (model.default) {
+                        defaultIndex = i;
+                    }
+                } else {
+                    let optgroup = document.createElement('optgroup');
+                    optgroup.label = model.group;
+                    add_options(optgroup, model.models);
+                    modelProvider.appendChild(optgroup);
+                }
+            });
+        }
+        add_options(modelProvider, models);
+        modelProvider.selectedIndex = defaultIndex;
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = "Favorites:";
+        const favorites = JSON.parse(appStorage.getItem("favorites") || "{}");
+        const selected = favorites[provider] || {};
+        Object.keys(selected).forEach((key) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.text = key;
+            const value_option = modelProvider.querySelector(`option[value="${key}"]`)
+            if (value_option) {
+                option.text = value_option.text;
             }
-            modelProvider.appendChild(option);
-            if (model.default) {
-                defaultIndex = i;
+            optgroup.appendChild(option);
+            if (optgroup.childElementCount > 5) {
+                optgroup.removeChild(optgroup.firstChild);
             }
         });
-        let value = appStorage.getItem(modelProvider.name);
-        if (value) {
-            modelProvider.value = value;
-        }
-        modelProvider.selectedIndex = defaultIndex;
+        optgroup.lastChild?.setAttribute("selected", "selected");
+        modelProvider.appendChild(optgroup);
     } else {
         modelProvider.classList.add("hidden");
         custom_model.classList.remove("hidden")
@@ -3341,6 +3341,26 @@ async function load_provider_models(provider=null) {
 };
 providerSelect.addEventListener("change", () => {
     load_provider_models()
+});
+modelProvider.addEventListener("change", () => {
+    const favorites = appStorage.getItem("favorites") ? JSON.parse(appStorage.getItem("favorites")) : {};
+    const selected = favorites[providerSelect.value] || {};
+    if (!selected[modelProvider.value]) {
+        let option = document.createElement('option');
+        option.value = modelProvider.value;
+        option.text = modelProvider.querySelector(`option[value="${modelProvider.value}"]`).text;
+        option.selected = true;
+        const optgroup = modelProvider.querySelector('optgroup:last-child');
+        optgroup.appendChild(option);
+        if (optgroup.childElementCount > 5) {
+            optgroup.removeChild(optgroup.firstChild);
+        }
+    }
+    const selected_values = selected[modelProvider.value] ? selected[modelProvider.value] + 1 : 1;
+    delete selected[modelProvider.value];
+    selected[modelProvider.value] = selected_values;
+    favorites[providerSelect.value] = selected;
+    appStorage.setItem("favorites", JSON.stringify(favorites));
 });
 custom_model.addEventListener("change", () => {
     if (!custom_model.value) {

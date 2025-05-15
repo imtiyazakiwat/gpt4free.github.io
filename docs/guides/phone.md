@@ -7,8 +7,8 @@ Running Python applications on your smartphone is possible with specialized apps
 </p>
 
 <p align="center">
-    <img src="/docs/guides/phone.png" />
-    <img src="/docs/guides/phone2.jpeg" />
+    <img src="/docs/images/phone.png" />
+    <img src="/docs/images/phone2.jpeg" />
 </p>
 
 1. **Install Pydroid from the Google Play Store:**
