@@ -203,4 +203,4 @@ To incorporate file uploads into your client applications, include the `bucket` 
 
 ---
 
-[Return to Documentation](/docs/)
+[Return to Documentation](/)
