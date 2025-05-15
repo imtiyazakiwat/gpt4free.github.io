@@ -3246,7 +3246,7 @@ async function load_provider_models(provider=null) {
         modelSelect.innerHTML = `<optgroup label="GPT Models">
     <option value="gpt-4o-mini" selected>gpt-4o-mini (default)</option>
     <option value="gpt-4o">gpt-4o</option>
-    <option value="gpt-4.1">gpt-</option>
+    <option value="gpt-4.1">gpt-4.1</option>
     <option value="gpt-4.1-mini">gpt-4.1-mini</option>
     <option value="gpt-4.1-nano">gpt-4.1-nano</option>
     <option value="gpt-4.5-preview">gpt-4.5-preview</option>
@@ -3282,7 +3282,6 @@ async function load_provider_models(provider=null) {
     <option value="codestral-latest">codestral-latest</option>
     <option value="google/gemma-2-27b-it">google/gemma-2-27b-it</option>
     <option value="grok-beta">grok-beta</option>
-    <option value="dall-e-3">dall-e-3 (${modelTags.image})</option>
   </optgroup>`;
         return;
     }

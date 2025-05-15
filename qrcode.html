@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Scanner and QR Code Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js" defer></script>
     <script src="dist/js/framework.js" async></script>
     <style>
         :root {
@@ -65,7 +65,7 @@
             margin-top: 20px; 
             background-color: white;
             padding: 10px;
-            display: inline-block;
+            display: none;
             border-radius: var(--border-radius);
         }
         
@@ -115,6 +115,9 @@
             border-radius: var(--border-radius);
             background-color: var(--blur-bg);
             border: 1px solid var(--blur-border);
+        }
+
+        #qrcode-status {
             display: inline-block;
         }
     </style>
@@ -227,6 +230,7 @@
             qrcodeStatus.innerText = share;
             qrcodeStatus.href = share;
             document.getElementById("qrcode").innerHTML = '';
+            document.getElementById("qrcode").style.display = 'inline-block';
             const qrcode = new QRCode(
                 document.getElementById("qrcode"),
                 share,
@@ -267,7 +271,7 @@
                 qrScanner = new QrScanner(videoElem, result => {
                     camStatus.innerText = 'Camera Success: ' + result.data;
                     console.log('decoded QR code:', result);
-                    if (result.data.startsWith(window.backendUrl)) {
+                    if (result.data.startsWith(window.location.origin)) {
                         window.parent.location = result.data;
                     }
                 }, {

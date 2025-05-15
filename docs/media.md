@@ -29,6 +29,45 @@ asyncio.run(main())
 ```
 
 <details>
+<summary>JavaScript</summary>
+
+```javascript
+async function generateSpeech(text) {
+    const url = '/v1/audio/speech'; // Replace with actual API URL
+    const requestData = {
+        input: text,
+        voice: '', // Adjust voice settings as needed
+        response_format: 'mp3' // Adjust format settings
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = new Audio(audioUrl);
+        audioElement.play();
+    } catch (error) {
+        console.error('Error generating speech audio:', error);
+    }
+}
+
+// Example usage
+generateSpeech('Hello, this is a speech synthesis test.');
+```
+</details>
+
+<details>
 <summary>Examples with other providers</summary>
 
 ```python
