@@ -245,4 +245,4 @@ For further customization and advanced use cases, refer to the G4F and PydanticA
 
 ---
 
-[Return to Documentation](/docs/)
+[Return to Documentation](/)
