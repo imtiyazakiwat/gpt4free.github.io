@@ -160,4 +160,4 @@ client.list_models()
 
 ---
 
-[Return to Documentation](/docs/)
+[Return to Documentation](/)
