@@ -2708,43 +2708,46 @@ async function on_api() {
     });
 
     let provider_options = [];
-    models = await api("models");
-    models.forEach((model) => {
-        let option = document.createElement("option");
-        option.value = model.name;
-        option.text = model.name + get_modelTags(model);
-        option.dataset.providers = model.providers.join(" ");
-        modelSelect.appendChild(option);
-        is_demo = model.demo;
-    });
-    if (is_demo) {
-        providerSelect.innerHTML = `
-            <option value="" selected="selected">Demo Mode</option>
-            <option value="ARTA">ARTA Provider</option>
-            <option value="DeepSeekAPI">DeepSeek Provider</option>
-            <option value="Grok">Grok Provider</option>
-            <option value="OpenaiChat">ChatGPT Provider</option>
-            <option value="PollinationsAI">Pollinations AI</option>
-            <option value="Live">Pollinations AI (live)</option>
-            <option value="Puter">Puter.js AI (live)</option>
-            <option value="Cloudflare">Cloudflare</option>
-            <option value="Copilot">Microsoft Copilot</option>
-            <option value="PerplexityLabs">Perplexity Labs</option>
-            <option value="Gemini">Gemini Provider</option>
-            <option value="HuggingFace">HuggingFace</option>
-            <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
-            <option value="HuggingSpace">HuggingSpace</option>
-            <option value="HuggingChat">HuggingChat</option>`;
-        document.getElementById("refine")?.parentElement.classList.add("hidden")
-        const track_usage = document.getElementById("track_usage");
-        track_usage.checked = true;
-        track_usage.disabled = true;
-        Array.from(modelSelect.querySelectorAll(':not([data-providers])')).forEach((option)=>{
-            if (!option.disabled && option.value) {
-                option.remove();
-            }
+    try {
+        models = await api("models");
+        models.forEach((model) => {
+            let option = document.createElement("option");
+            option.value = model.name;
+            option.text = model.name + get_modelTags(model);
+            option.dataset.providers = model.providers.join(" ");
+            modelSelect.appendChild(option);
+            is_demo = model.demo;
         });
-    } else {
+        if (is_demo) {
+            providerSelect.innerHTML = `
+                <option value="" selected="selected">Demo Mode</option>
+                <option value="ARTA">ARTA Provider</option>
+                <option value="DeepSeekAPI">DeepSeek Provider</option>
+                <option value="Grok">Grok Provider</option>
+                <option value="OpenaiChat">ChatGPT Provider</option>
+                <option value="PollinationsAI">Pollinations AI</option>
+                <option value="Live">Pollinations AI (live)</option>
+                <option value="Puter">Puter.js AI (live)</option>
+                <option value="Cloudflare">Cloudflare</option>
+                <option value="Copilot">Microsoft Copilot</option>
+                <option value="PerplexityLabs">Perplexity Labs</option>
+                <option value="Gemini">Gemini Provider</option>
+                <option value="HuggingFace">HuggingFace</option>
+                <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
+                <option value="HuggingSpace">HuggingSpace</option>
+                <option value="HuggingChat">HuggingChat</option>`;
+            document.getElementById("refine")?.parentElement.classList.add("hidden")
+            const track_usage = document.getElementById("track_usage");
+            track_usage.checked = true;
+            track_usage.disabled = true;
+            Array.from(modelSelect.querySelectorAll(':not([data-providers])')).forEach((option)=>{
+                if (!option.disabled && option.value) {
+                    option.remove();
+                }
+            });
+        }
+    } catch(e) {
+        console.error("Error loading models:", e);
         providers = api("providers").then((providers) => load_providers(providers, provider_options)).catch(() => {
             providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
             load_fallback_models();

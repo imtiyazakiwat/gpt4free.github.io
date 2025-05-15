@@ -205,11 +205,11 @@ To incorporate file uploads into your client applications, include the `bucket` 
 
 ## 📄 MarkItDown – Lightweight File-to-Text API (Alternative to G4F File API)
 
-`markitdown` is a simple and lightweight alternative to the G4F File API for extracting **plain or markdown-formatted text** from uploaded files. While the G4F File API supports bucket-based multi-file workflows and streaming, `markitdown` is ideal for **quick, direct conversion of individual files** (e.g. `.md`, `.pdf`, `.docx`, etc.).
+`markitdown` is a simple and lightweight alternative to the G4F File API for extracting **plain or markdown-formatted text** from uploaded files. While the G4F File API supports bucket-based multi-file workflows and streaming, `markitdown` is ideal for **quick, direct conversion of individual files** (e.g. `.pdf`, `.docx`, `.wav`, etc.).
 
 ### ✅ Key Features
 
-- 🔄 Converts a wide range of files (Markdown, PDF, DOCX, TXT, AUDIO, etc.) to markdown/plain text.
+- 🔄 Converts a wide range of files (PDF, DOCX, TXT, AUDIO, etc.) to markdown/plain text.
 - 📤 Simple POST API: Send a file, receive extracted text.
 - ⚡ Fast, no bucket, SSE, or URL fetch needed.
 - 🎯 Ideal for use-cases where full document text is needed inline in chat prompts.
@@ -239,7 +239,7 @@ def convert_with_markitdown(file_path):
             raise Exception(f"Conversion failed: {response.status_code} - {response.text}")
 
 # Usage
-text = convert_with_markitdown('example.md')
+text = convert_with_markitdown('example.pdf')
 print(text)
 ```
 
