@@ -33,7 +33,7 @@ set_cookies(".google.com", {
 ---
 ### HAR and Cookie Files
 **Using .har and Cookie Files**
-You can place `.har` and cookie files `.json` in the default `./har_and_cookies` directory. To export a cookie file, use the [EditThisCookie Extension](https://chromewebstore.google.com/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg) available on the Chrome Web Store.
+You can place `.har` and cookie files `.json` in the default `./har_and_cookies` directory. To export a cookie file, use the [EditThisCookie Extension](https://chromewebstore.google.com/detail/editthiscookie-v3/ojfebgpkimhlhcblbalbfjblapadhbol) available on the Chrome Web Store.
 
 **Creating .har Files to Capture Cookies**
 To capture cookies, you can also create `.har` files. For more details, refer to the next section.
