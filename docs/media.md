@@ -400,4 +400,4 @@ asyncio.run(main())
 
 ---
 
-[Return to Documentation](/docs/)
+[Return to Documentation](/)
