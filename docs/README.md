@@ -57,12 +57,37 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 - [PydanticAI & LangChain Integration](pydantic_ai.md)
 
+Absolutely! Here’s a “Powered by” section for your README.md, featuring clear, engaging descriptions of what each service actually does. No logo descriptions—just crisp, relevant details about the services and what they bring to your project:
 
-## 🤗 Greetings
+---
 
-![Pollinations.AI](https://raw.githubusercontent.com/pollinations/pollinations/refs/heads/master/pollinations.ai/public/banner.webp)
-Pollinations.AI: https://github.com/pollinations/pollinations
+## 🚀 Powered by
 
+**🌟 Pollinations AI**
+
+<img src="https://image.pollinations.ai/prompt/Create+a+logo+for+Pollinations+AI+featuring+an+abstract+flower+blooming+digital+petals+glowing+center+futuristic+font+Pollinations+AI?width=512&height=256&nologo=true" height="128">
+
+A creative AI content platform that generates images, audios, and other media using advanced generative models. Pollinations AI empowers users and developers to turn text into visuals and multimedia experiences.
+
+> https://github.com/pollinations/pollinations
+
+**🔍DuckDuckGo Search**
+
+<img src="https://image.pollinations.ai/prompt/logo+DuckDuckGo?width=512&height=256&nologo=true" height="128">
+
+A privacy-centric internet search engine delivering unbiased, ad-free results without tracking your personal data. DuckDuckGo prioritizes user confidentiality while providing reliable web search functionality.
+
+**🤖 GitHub**
+
+<img src="https://image.pollinations.ai/prompt/Create+a+logo+for+GitHub+featuring+an+octocat+icon+integrated+with+code+brackets%2C+modern+technical+font+text+GitHub%2C+colors+deep+black%2C+white%2C+subtle+purple?width=512&height=256&nologo=true" height="128">
+
+The world’s leading platform for version control and collaborative software development. GitHub enables seamless code management, issue tracking, pull requests, and collaborative branching across teams of any size.
+
+**🤗 HuggingFace**
+
+<img src="https://image.pollinations.ai/prompt/Create+a+logo+for+HuggingFace+featuring+a+friendly+smiling+face+hugging?width=512&height=256&nologo=true" height="128">
+
+A hub for open-source machine learning models and natural language processing tools. HuggingFace hosts state-of-the-art AI models, enabling easy integration of functions like language understanding, text generation, and more.
 
 ---
 
