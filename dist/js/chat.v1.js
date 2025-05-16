@@ -2708,30 +2708,17 @@ async function on_api() {
     });
 
     let provider_options = [];
-    try {
-        models = await api("models");
+    api("models").then((models)=>{
         models.forEach((model) => {
-            let option = document.createElement("option");
-            option.value = model.name;
-            option.text = model.name + get_modelTags(model);
-            option.dataset.providers = model.providers.join(" ");
-            modelSelect.appendChild(option);
             is_demo = model.demo;
         });
         if (is_demo) {
-            providerSelect.innerHTML = `
-                <option value="" selected="selected">Demo Mode</option>
+            providerSelect.innerHTML += `
                 <option value="ARTA">ARTA Provider</option>
                 <option value="DeepSeekAPI">DeepSeek Provider</option>
                 <option value="Grok">Grok Provider</option>
-                <option value="OpenaiChat">ChatGPT Provider</option>
-                <option value="PollinationsAI">Pollinations AI</option>
-                <option value="Live">Pollinations AI (live)</option>
-                <option value="Puter">Puter.js AI (live)</option>
                 <option value="Cloudflare">Cloudflare</option>
-                <option value="Copilot">Microsoft Copilot</option>
                 <option value="PerplexityLabs">Perplexity Labs</option>
-                <option value="Gemini">Gemini Provider</option>
                 <option value="HuggingFace">HuggingFace</option>
                 <option value="HuggingFaceMedia">HuggingFace (Image/Video Generation)</option>
                 <option value="HuggingSpace">HuggingSpace</option>
@@ -2745,21 +2732,15 @@ async function on_api() {
                     option.remove();
                 }
             });
+        } else {
+            api("providers").then((providers) => load_providers(providers, provider_options));
         }
-    } catch(e) {
-        console.error("Error loading models:", e);
-    }
-
-    providers = api("providers").then((providers) => load_providers(providers, provider_options)).catch(() => {
+        load_provider_models(appStorage.getItem("provider"));
+    }).catch((e)=>{
+        console.log(e)
         providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
         load_fallback_models();
     });
-
-    if (appStorage.getItem("provider")) {
-        await load_provider_models(appStorage.getItem("provider"))
-    } else {
-        providerSelect.selectedIndex = 0;
-    }
 
     let providersListContainer = document.createElement("div");
     providersListContainer.classList.add("field", "collapsible");
