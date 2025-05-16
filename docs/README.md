@@ -8,7 +8,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 - [Git Installation Guide](git.md)
 - [Docker Setup](docker.md)
-- [Requirements](requirements.md)
+- [Additional Requirements](requirements.md)
 
 ---
 
@@ -16,7 +16,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 - [Local Usage Guide](local.md)
 - [Authentication Guide](authentication.md)
-- [Configuration Guide](configuration.md)
+- [Configuration Guide (.har and cookies)](configuration.md)
 
 ---
 
@@ -57,7 +57,11 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 - [PydanticAI & LangChain Integration](pydantic_ai.md)
 
-Absolutely! Here’s a “Powered by” section for your README.md, featuring clear, engaging descriptions of what each service actually does. No logo descriptions—just crisp, relevant details about the services and what they bring to your project:
+---
+
+## 📚 API Documentation
+
+- Check out the [official API docs](https://gpt4free.github.io/api-docs) for more details.
 
 ---
 
