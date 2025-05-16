@@ -2748,11 +2748,12 @@ async function on_api() {
         }
     } catch(e) {
         console.error("Error loading models:", e);
-        providers = api("providers").then((providers) => load_providers(providers, provider_options)).catch(() => {
-            providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
-            load_fallback_models();
-        });
     }
+
+    providers = api("providers").then((providers) => load_providers(providers, provider_options)).catch(() => {
+        providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
+        load_fallback_models();
+    });
 
     if (appStorage.getItem("provider")) {
         await load_provider_models(appStorage.getItem("provider"))
@@ -3332,9 +3333,12 @@ async function load_provider_models(provider=null) {
             }
             optgroup.appendChild(option);
             if (optgroup.childElementCount > 5) {
+                delete selected[optgroup.firstChild.value];
                 optgroup.removeChild(optgroup.firstChild);
             }
         });
+        favorites[provider] = selected;
+        appStorage.setItem("favorites", JSON.stringify(favorites));
         optgroup.lastChild?.setAttribute("selected", "selected");
         modelProvider.appendChild(optgroup);
     } else {
@@ -3356,6 +3360,7 @@ modelProvider.addEventListener("change", () => {
         const optgroup = modelProvider.querySelector('optgroup:last-child');
         optgroup.appendChild(option);
         if (optgroup.childElementCount > 5) {
+            delete selected[optgroup.firstChild.value];
             optgroup.removeChild(optgroup.firstChild);
         }
     }
