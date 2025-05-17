@@ -2601,7 +2601,7 @@ function get_modelTags(model, add_vision = true) {
     return parts.join("");
 }
 
-function load_providers(providers, provider_options) {
+function load_providers(providers, provider_options, providersListContainer) {
     providers.sort((a, b) => a.label.localeCompare(b.label));
     providers.forEach((provider) => {
         let option = document.createElement("option");
@@ -2663,6 +2663,30 @@ function load_providers(providers, provider_options) {
         providersContainer.querySelector(".collapsible-content").classList.toggle('hidden');
         providersContainer.querySelector(".collapsible-header").classList.toggle('active');
     });
+    load_provider_login_urls(providersListContainer);
+}
+function load_provider_login_urls(providersListContainer) {
+    for (let [name, [label, login_url, childs, auth]] of Object.entries(login_urls_storage)) {
+        if (!login_url && !is_demo) {
+            continue;
+        }
+        let providerBox = document.createElement("div");
+        providerBox.classList.add("field", "box");
+        childs = childs.map((child) => `${child}-api_key`).join(" ");
+        const placeholder = `placeholder="${name == "HuggingSpace" ? "zerogpu_token" : "api_key"}"`;
+        providerBox.innerHTML = `
+            <label for="${name}-api_key" class="label" title="">${label}:</label>
+            <input type="text" id="${name}-api_key" name="${name}[api_key]" class="${childs}" ${placeholder} autocomplete="off"/>
+        ` + (login_url ? `<a href="${login_url}" target="_blank" title="Login to ${label}">${window.translate('Get API key')}</a>` : "");
+        if (auth) {
+            providerBox.querySelector("input").addEventListener("input", (event) => {
+                const input = document.getElementById(`Provider${name}`);
+                input.checked = !!event.target.value;
+                load_provider_option(input, name);
+            });
+        }
+        providersListContainer.querySelector(".collapsible-content").appendChild(providerBox);
+    }
 }
 async function on_api() {
     load_version();
@@ -2707,6 +2731,22 @@ async function on_api() {
         stopRecognition();
     });
 
+    let providersListContainer = document.createElement("div");
+    providersListContainer.classList.add("field", "collapsible");
+    providersListContainer.innerHTML = `
+        <div class="collapsible-header">
+            <span class="label">${window.translate('Providers API key')}</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="collapsible-content api-key hidden"></div>
+    `;
+    settings.querySelector(".paper").appendChild(providersListContainer);
+
+    providersListContainer.querySelector(".collapsible-header").addEventListener('click', (e) => {
+        providersListContainer.querySelector(".collapsible-content").classList.toggle('hidden');
+        providersListContainer.querySelector(".collapsible-header").classList.toggle('active');
+    });
+
     let provider_options = [];
     api("models").then((models)=>{
         models.forEach((model) => {
@@ -2732,52 +2772,15 @@ async function on_api() {
                     option.remove();
                 }
             });
+            load_provider_login_urls(providersListContainer);
         } else {
-            api("providers").then((providers) => load_providers(providers, provider_options));
+            api("providers").then((providers) => load_providers(providers, provider_options, providersListContainer));
         }
         load_provider_models(appStorage.getItem("provider"));
     }).catch((e)=>{
         console.log(e)
         providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
         load_fallback_models();
-    });
-
-    let providersListContainer = document.createElement("div");
-    providersListContainer.classList.add("field", "collapsible");
-    providersListContainer.innerHTML = `
-        <div class="collapsible-header">
-            <span class="label">${window.translate('Providers API key')}</span>
-            <i class="fa-solid fa-chevron-down"></i>
-        </div>
-        <div class="collapsible-content api-key hidden"></div>
-    `;
-    settings.querySelector(".paper").appendChild(providersListContainer);
-
-    for (let [name, [label, login_url, childs, auth]] of Object.entries(login_urls_storage)) {
-        if (!login_url && !is_demo) {
-            continue;
-        }
-        let providerBox = document.createElement("div");
-        providerBox.classList.add("field", "box");
-        childs = childs.map((child) => `${child}-api_key`).join(" ");
-        const placeholder = `placeholder="${name == "HuggingSpace" ? "zerogpu_token" : "api_key"}"`;
-        providerBox.innerHTML = `
-            <label for="${name}-api_key" class="label" title="">${label}:</label>
-            <input type="text" id="${name}-api_key" name="${name}[api_key]" class="${childs}" ${placeholder} autocomplete="off"/>
-        ` + (login_url ? `<a href="${login_url}" target="_blank" title="Login to ${label}">${window.translate('Get API key')}</a>` : "");
-        if (auth) {
-            providerBox.querySelector("input").addEventListener("input", (event) => {
-                const input = document.getElementById(`Provider${name}`);
-                input.checked = !!event.target.value;
-                load_provider_option(input, name);
-            });
-        }
-        providersListContainer.querySelector(".collapsible-content").appendChild(providerBox);
-    }
-
-    providersListContainer.querySelector(".collapsible-header").addEventListener('click', (e) => {
-        providersListContainer.querySelector(".collapsible-content").classList.toggle('hidden');
-        providersListContainer.querySelector(".collapsible-header").classList.toggle('active');
     });
 
     register_settings_storage();
