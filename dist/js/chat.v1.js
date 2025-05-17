@@ -2230,6 +2230,15 @@ const register_settings_storage = async () => {
     });
 }
 
+async function load_settings(provider_options) {
+    await register_settings_storage();
+    await load_settings_storage();
+
+    Object.entries(provider_options).forEach(
+        ([provider_name, option]) => load_provider_option(option.querySelector("input"), provider_name)
+    );
+}
+
 const load_settings_storage = async () => {
     const optionElements = document.querySelectorAll(optionElementsSelector);
     optionElements.forEach((element) => {
@@ -2669,6 +2678,7 @@ function load_providers(providers, provider_options, providersListContainer) {
         providersContainer.querySelector(".collapsible-header").classList.toggle('active');
     });
     load_provider_login_urls(providersListContainer);
+    load_settings(provider_options);
 }
 function load_provider_login_urls(providersListContainer) {
     for (let [name, [label, login_url, childs, auth]] of Object.entries(login_urls_storage)) {
@@ -2778,6 +2788,7 @@ async function on_api() {
                 }
             });
             load_provider_login_urls(providersListContainer);
+            load_settings(provider_options);
         } else {
             api("providers").then((providers) => load_providers(providers, provider_options, providersListContainer));
         }
@@ -2786,13 +2797,8 @@ async function on_api() {
         console.log(e)
         providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
         load_fallback_models();
+        load_settings(provider_options);
     });
-
-    register_settings_storage();
-    await load_settings_storage();
-    Object.entries(provider_options).forEach(
-        ([provider_name, option]) => load_provider_option(option.querySelector("input"), provider_name)
-    );
 
     const update_systemPrompt_icon = (checked) => {
         slide_systemPrompt_icon.classList[checked ? "remove": "add"]("fa-angles-up");

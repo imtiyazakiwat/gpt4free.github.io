@@ -198,8 +198,8 @@
                 <a href="https://huggingface.co/settings/tokens" target="_blank">Get Access Token</a>
             </p>
             <img src="https://huggingface.co/datasets/huggingface/badges/resolve/main/sign-in-with-huggingface-xl-dark.svg" alt="Sign in with Hugging Face" style="cursor: pointer; display: none;" id="signin">
-            <button id="signout" style="display: none">Sign out</button>
         </form>
+        <button id="signout" style="display: none">Sign out</button>
         <script type="module">
             import * as hub from "@huggingface/hub";
             import { oauthLoginUrl, oauthHandleRedirectIfPresent } from "@huggingface/hub";
@@ -227,7 +227,7 @@
             const form = document.querySelector("form");
             const input = document.querySelector('form input[name="token"]');
             async function check_access_token() {
-                const accessToken = input.value || localStorage.getItem("HuggingFace-api_key");
+                const accessToken = input.value;
                 if (!accessToken) {
                     return;
                 }
