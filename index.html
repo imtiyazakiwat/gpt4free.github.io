@@ -229,7 +229,7 @@
             async function check_access_token() {
                 const accessToken = input.value;
                 if (!accessToken) {
-                    return;
+                    return true;
                 }
                 let user;
                 try {
@@ -242,17 +242,18 @@
                         localStorage.removeItem("oauth");
                         window.location.replace("/");
                     }
-                    return;
+                    return false;
                 }
                 localStorage.setItem("HuggingFace-api_key", accessToken);
                 localStorage.setItem("user", user.name);
                 localStorage.setItem("report_error", "true")
-                location.href = "chat/";
+                return true;
             }
-            input.addEventListener("input", () => check_access_token());
-            input.addEventListener("click", () => check_access_token());
-            form.addEventListener("submit", async (event) => {
-                check_access_token();
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                if(await check_access_token()) {
+                    e.currentTarget.submit();
+                }
             });
 
             let oauthResult = localStorage.getItem("oauth");
