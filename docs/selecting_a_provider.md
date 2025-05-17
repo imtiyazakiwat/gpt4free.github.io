@@ -1,4 +1,3 @@
-
 ## G4F - Selecting a Provider
 
 **The Interference API also allows you to specify which provider(s) to use for processing requests. This is done using the `provider` parameter, which can be included alongside the `model` parameter in your API requests. Providers can be specified as a space-separated string of provider IDs.**
