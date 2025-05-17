@@ -118,7 +118,6 @@ if (window.markdownit) {
                 return `[![${item.name}](${item.url})]()`;
             }).join("\n");
         }
-        content = content.replaceAll(/<!-- generated images start -->|<!-- generated images end -->/gm, "")
         content = markdown.render(content)
             .replaceAll("<a href=", '<a target="_blank" href=')
             .replaceAll('<code>', '<code class="language-plaintext">')
@@ -134,7 +133,7 @@ if (window.markdownit) {
                     a: [ 'href', 'title', 'target' ],
                     i: [ 'class' ],
                     code: [ 'class' ],
-                    img: [ 'src', 'alt' ],
+                    img: [ 'src', 'alt', 'width', 'height' ],
                     iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
                     audio: [ 'src', 'controls' ],
                     video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
@@ -1372,47 +1371,53 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         return generate_text(message, model);
     } 
     try {
-        let api_key;
+        let apiKey;
         if (is_demo && !provider) {
-            api_key = localStorage.getItem("HuggingFace-api_key");
+            apiKey = localStorage.getItem("HuggingFace-api_key");
         } else {
-            api_key = get_api_key_by_provider(provider);
+            apiKey = get_api_key_by_provider(provider);
         }
-        const download_media = document.getElementById("download_media")?.checked;
-        let api_base;
+        const downloadMedia = document.getElementById("download_media")?.checked;
+        let apiBase;
         if (provider == "Custom") {
-            api_base = document.getElementById("api_base")?.value;
-            if (!api_base) {
+            apiBase = document.getElementById("api_base")?.value;
+            if (!apiBase) {
                 provider = "";
             }
         }
         const ignored = Array.from(settings.querySelectorAll("input.provider:not(:checked)")).map((el)=>el.value);
-        let extra_parameters = [];
+        const extraBody = {};
         for (el of document.getElementById(`${provider}-form`)?.querySelectorAll(".saved input, .saved textarea") || []) {
             let value = el.type == "checkbox" ? el.checked : el.value;
             try {
                 value = await JSON.parse(value);
             } catch (e) {
             }
-            extra_parameters[el.name] = value;
+            extraBody[el.name] = value;
         };
-        automaticOrientation = appStorage.getItem("automaticOrientation") != "false";
-        aspect_ratio = automaticOrientation ? (window.innerHeight > window.innerWidth ? "9:16" : "16:9") : null;
+        const isAutomaticOrientation = appStorage.getItem("automaticOrientation") != "false";
+        const aspectRatio = isAutomaticOrientation ? (window.innerHeight > window.innerWidth ? "9:16" : "16:9") : null;
+        let conversationData = null;
+        if (provider == "AnyProvider") {
+            conversationData = conversation.data;
+        } else if (provider && conversation.data && provider in conversation.data) {
+            conversationData = conversation.data[provider];
+        }
         await api("conversation", {
             id: message_id,
             conversation_id: window.conversation_id,
-            conversation: provider && conversation.data && provider in conversation.data ? conversation.data[provider] : null,
+            conversation: conversationData,
             model: model,
             web_search: switchInput.checked,
             provider: provider,
             messages: messages,
             action: action,
-            download_media: download_media,
-            api_key: api_key,
-            api_base: api_base,
+            download_media: downloadMedia,
+            api_key: apiKey,
+            api_base: apiBase,
             ignored: ignored,
-            aspect_ratio: aspect_ratio,
-            ...extra_parameters
+            aspect_ratio: aspectRatio,
+            ...extraBody
         }, Object.values(image_storage), message_id, scroll, finish_message);
     } catch (e) {
         console.error(e);
