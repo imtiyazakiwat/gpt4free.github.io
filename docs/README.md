@@ -59,19 +59,29 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 ---
 
+### 📖 Guides
+
+###### Guide: How do I create a new Provider?  
+- **Read:** [Create Provider Guide](https://github.com/gpt4free/gpt4free.github.io/blob/main/docs/guides/create_provider.md)
+
+###### Guide: How can AI help me with writing code?  
+- **Read:** [AI Assistance Guide](https://github.com/gpt4free/gpt4free.github.io/blob/main/docs/guides/help_me.md)
+
+---
+
 ### 📚 API Documentation
 
 - Check out the [official API docs](https://gpt4free.github.io/api-docs) for more details.
 
-### 🚀 Used by gpt4free
+---
 
-**🌟 Pollinations AI**
+### 🌟 Pollinations AI
 
 <img src="https://image.pollinations.ai/prompt/Create+a+logo+for+Pollinations+AI+featuring+an+abstract+flower+blooming+digital+petals+glowing+center+futuristic+font+Pollinations+AI?width=512&height=256&nologo=true" height="128">
 
 A creative AI content platform that generates images, audios, and other media using advanced generative models. Pollinations AI empowers users and developers to turn text into visuals and multimedia experiences.
 
-> [github.com/pollinations/pollinations](https://github.com/pollinations/pollinations)
+> [pollinations/pollinations on GitHub](https://github.com/pollinations/pollinations)
 
 ---
 
