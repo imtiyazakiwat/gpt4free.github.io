@@ -486,6 +486,10 @@ body:not(.white) a:visited{
     margin: 2px;
 }
 
+.media-select .capture-audio {
+     width: 42px;   
+}
+
 .media-select label, .media-select button {
     padding: 20px 12px;
     border-radius: var(--border-radius-1);

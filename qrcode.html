@@ -153,31 +153,17 @@
         let qrScanner;
 
         // Function to synchronize the theme
-        function syncTheme() {
+        (() => {
             const isDarkMode = localStorage.getItem("darkMode") !== "false";
             if (isDarkMode) {
                 document.body.classList.remove("white");
             } else {
                 document.body.classList.add("white");
             }
-        }
+        })();
 
         // Initial synchronization of the theme
         syncTheme();
-
-        // Tracking theme changes via localStorage
-        window.addEventListener('storage', function(e) {
-            if (e.key === "darkMode") {
-                syncTheme();
-            }
-        });
-
-        // If the page is opened in an iframe, we listen to messages from the parent window
-        window.addEventListener('message', function(e) {
-            if (e.data && e.data.type === 'themeChange') {
-                syncTheme();
-            }
-        });
 
         document.getElementById('stopCamera').addEventListener('click', () => {
             if (currentStream) {
@@ -201,7 +187,7 @@
         let share_id = null;
         document.getElementById('generateQRCode').addEventListener('click', async () => {
             if (share_id) {
-                localStorage.getItem(`conversation:${share_id}`);
+                localStorage.removeItem(`conversation:${share_id}`);
                 const delete_url = `${window.backendUrl}/backend-api/v2/files/${encodeURIComponent(share_id)}`;
                 await fetch(delete_url, {
                     method: 'DELETE'

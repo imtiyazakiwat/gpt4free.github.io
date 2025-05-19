@@ -13,6 +13,7 @@ const imageInput        = document.querySelector(".image-label");
 const mediaSelect       = document.querySelector(".media-select");
 const imageSelect       = document.getElementById("image");
 const cameraInput       = document.getElementById("camera");
+const audioInput        = document.querySelector(".capture-audio");
 const fileInput         = document.getElementById("file");
 const microLabel        = document.querySelector(".micro-label");
 const inputCount        = document.getElementById("input-count").querySelector(".text");
@@ -74,6 +75,7 @@ let usage_storage = {};
 let reasoning_storage = {};
 let title_ids_storage = {};
 let image_storage = {};
+let audio_storage = {};
 let is_demo = false;
 let wakeLock = null;
 let countTokensEnabled = true;
@@ -81,6 +83,7 @@ let reloadConversation = true;
 let privateConversation = null;
 let suggestions = null;
 let lastUpdated = null;
+let mediaRecorder = null;
 let stopRecognition = ()=>{};
 
 // Hotfix for mobile
@@ -110,10 +113,10 @@ if (window.markdownit) {
                     return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
                 }
                 if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
-                    return `<audio controls src="${item.url}"></audio>`;
+                    return `<audio controls src="${item.url}"></audio>` + (item.text ? `\n${item.text}` : "");
                 }
                 if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
-                    return `<video controls src="${item.url}"></video>`;
+                    return `<video controls src="${item.url}"></video>` + (item.text ? `\n${item.text}` : "");
                 }
                 return `[![${item.name}](${item.url})]()`;
             }).join("\n");
@@ -121,7 +124,6 @@ if (window.markdownit) {
         content = markdown.render(content)
             .replaceAll("<a href=", '<a target="_blank" href=')
             .replaceAll('<code>', '<code class="language-plaintext">')
-            .replaceAll('<video controls src="', '<video loop autoplay controls muted src="')
             .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
             .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
             .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
@@ -997,7 +999,22 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         }
     } else if (message.type == "content") {
         message_storage[message_id] += message.content;
-        update_message(content_map, message_id, null, scroll);
+        if (message.urls) {
+            const div = document.createElement("div");
+            div.innerHTML = markdown_render(message.content);
+            const media = div.querySelector("img, video")
+            if (scroll) {
+                media.onload = lazy_scroll_to_bottom;
+            }
+            content_map.inner.appendChild(div);
+            let cursorDiv = message_el.querySelector(".cursor");
+            if (cursorDiv) cursorDiv.parentNode.removeChild(cursorDiv);
+            const i = document.createElement("i");
+            i.classList.add("fas", "fa-spinner", "fa-spin");
+            content_map.appendChild(i);
+        } else {
+            update_message(content_map, message_id, null, scroll);
+        }
     } else if (message.type == "log") {
         let p = document.createElement("p");
         p.innerText = message.log;
@@ -1026,7 +1043,9 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         } if (message.token) {
             reasoning_storage[message_id].text += message.token;
         }
-        update_message(content_map, message_id, null, scroll);
+        let reasoning_body = content_map.inner.querySelector(".reasoning_body") || content_map.inner;
+        reasoning_body.classList.remove("reasoning_body");
+        reasoning_body.innerHTML = render_reasoning(reasoning_storage[message_id]);
     } else if (message.type == "parameters") {
         if (!parameters_storage[provider]) {
             parameters_storage[provider] = {};
@@ -1804,6 +1823,20 @@ const load_conversation = async (conversation, scroll=true) => {
     });
     chatBody.innerHTML = elements.join("");
 
+    chatBody.querySelectorAll("video").forEach((el) => {
+        el.onloadedmetadata = () => {
+            console.log(el.videoWidth);
+            if (el.videoWidth > 0) {
+                el.muted = true;
+                el.loop = true;
+                el.play()
+            } else {
+                el.style.width = "300px";
+                el.style.height = "40px";
+            }
+        }
+    });
+
     if (suggestions) {
         const suggestions_el = document.createElement("div");
         suggestions_el.classList.add("suggestions");
@@ -2378,7 +2411,18 @@ function update_message(content_map, message_id, content = null, scroll = true) 
         } else {
             content_map.inner.innerHTML = content;
         }
-        
+        console.log(document.querySelectorAll("video"))
+        document.querySelectorAll("video").forEach((el) => {
+            el.onloadedmetadata = () => {
+                console.log("Video can play");
+                if (el.videoWidth < 0) {
+                    el.stop();
+                    el.removeAttribute("muted");
+                    el.removeAttribute("loop");
+                    el.removeAttribute("autoplay");}
+            }
+        });
+
         if (countTokensEnabled) {
             content_map.count.innerText = count_words_and_tokens(
                 (reasoning_storage[message_id] ? reasoning_storage[message_id].text : "")
@@ -2393,16 +2437,22 @@ function update_message(content_map, message_id, content = null, scroll = true) 
     }, 100));
 };
 
-function renderLargeMessage(container, content, chunkSize = 5000) {
-    if (content.length <= chunkSize) {
+function renderLargeMessage(container, content, chunkSize = 50) {
+    if (content.length <= chunkSize * 100) {
         container.innerHTML = content;
         return;
     }
     
     // Split content into chunks
+    const lines = content.split("\n");
     const chunks = [];
-    for (let i = 0; i < content.length; i += chunkSize) {
-        chunks.push(content.substring(i, i + chunkSize));
+    const buffer = [];
+    for (let i = 0; i < lines.length; i += 1) {
+        buffer.push(lines[i]);
+        if (buffer.length >= chunkSize || i === lines.length - 1) {
+            chunks.push(buffer.join("\n"));
+            buffer.length = 0; // Clear the buffer
+        }
     }
     
     // Render chunks progressively
@@ -2915,6 +2965,59 @@ mediaSelect.querySelector(".close").onclick = () => {
     });
 });
 
+audioInput.addEventListener('click', async (event) => {
+    const i = audioInput.querySelector("i");
+    if (mediaRecorder) {
+        i.classList.remove("fa-stop");
+        i.classList.add("fa-microphone");
+        mediaRecorder.stop();
+        mediaRecorder = null;
+        return;
+    }
+
+    i.classList.remove("fa-microphone");
+    i.classList.add("fa-stop");
+
+    stream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: true,
+    })
+
+    if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        console.warn('audio/webm is not supported');
+    }
+
+    mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm',
+    });
+
+    mediaRecorder.addEventListener('dataavailable', async event => {
+        const formData = new FormData();
+        formData.append('files', event.data);
+        const bucket_id = generateUUID();
+        const language = document.getElementById("recognition-language")?.value;
+        const response = await fetch(window.backendUrl + "/backend-api/v2/files/" + bucket_id, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                "x-recognition-language": language,
+            }
+        });
+        const result = await response.json()
+        if (result.media) {
+            const media = [];
+            result.media.forEach((part)=> {
+                part = part.name ? part : {name: part};
+                const url = `${window.backendUrl}/files/${bucket_id}/media/${part.name}`;
+                media.push({bucket_id: bucket_id, url: url, ...part});
+            });
+            await handle_ask(false, media);
+        }
+    });
+
+    mediaRecorder.start()
+})
+
 fileInput.addEventListener('click', async (event) => {
     fileInput.value = '';
 });
@@ -3020,9 +3123,10 @@ async function upload_files(fileInput) {
     }
     if (result.media) {
         const media = [];
-        result.media.forEach((filename)=> {
-            const url = `${window.backendUrl}/files/${bucket_id}/media/${filename}`;
-            media.push({bucket_id: bucket_id, name: filename, url: url});
+        result.media.forEach((part)=> {
+            part = part.name ? part : {name: part};
+            const url = `${window.backendUrl}/files/${bucket_id}/media/${part.name}`;
+            media.push({bucket_id: bucket_id, url: url, ...part});
         });
         await handle_ask(false, media);
     }
