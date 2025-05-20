@@ -162,9 +162,6 @@
             }
         })();
 
-        // Initial synchronization of the theme
-        syncTheme();
-
         document.getElementById('stopCamera').addEventListener('click', () => {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
