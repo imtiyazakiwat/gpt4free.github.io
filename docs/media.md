@@ -320,6 +320,18 @@ try {
 <details>
 <summary>JavaScript with MediaRecorder</summary>
 
+Required:
+```
+pip install markitdown[audio-transcription]
+```
+```
+apt-get install ffmpeg flac
+```
+Optional:
+```
+pip install faster_whisper
+```
+Full example:
 ```javascript
 audioButton.addEventListener('click', async (event) => {
     if (mediaRecorder) {
