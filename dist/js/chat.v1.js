@@ -1,4 +1,3 @@
-const colorThemes       = document.querySelectorAll('[name="theme"]');
 const chatBody          = document.getElementById(`chatBody`);
 const userInput         = document.getElementById("userInput");
 const codeButton        = document.querySelector(".code");
@@ -13,7 +12,7 @@ const imageInput        = document.querySelector(".image-label");
 const mediaSelect       = document.querySelector(".media-select");
 const imageSelect       = document.getElementById("image");
 const cameraInput       = document.getElementById("camera");
-const audioInput        = document.querySelector(".capture-audio");
+const audioButton        = document.querySelector(".capture-audio");
 const fileInput         = document.getElementById("file");
 const microLabel        = document.querySelector(".micro-label");
 const inputCount        = document.getElementById("input-count").querySelector(".text");
@@ -40,7 +39,8 @@ const translationSnipptes = [
     "{0} Messages were imported", "{0} File(s) uploaded successfully",
     "{0} Conversations/Settings were imported successfully",
     "No content found", "Files are loaded successfully",
-    "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)", "Get API key"];
+    "Importing conversations...", "New version:", "Providers API key", "Providers (Enable/Disable)", "Get API key"
+];
 
 let login_urls_storage = {
     "HuggingFace": ["HuggingFace", "https://huggingface.co/settings/tokens", ["HuggingFaceMedia", "AnyProvider"]],
@@ -75,7 +75,6 @@ let usage_storage = {};
 let reasoning_storage = {};
 let title_ids_storage = {};
 let image_storage = {};
-let audio_storage = {};
 let is_demo = false;
 let wakeLock = null;
 let countTokensEnabled = true;
@@ -96,55 +95,55 @@ appStorage = window.localStorage || {
     length: 0
 }
 
-let markdown_render = (content) => escapeHtml(content);
-if (window.markdownit) {
+const markdown_render = (content) => {
+    if (!content) {
+        return "";
+    }
+    if (!window.markdownit) {
+        return escapeHtml(content);
+    }
+    if (Array.isArray(content)) {
+        content = content.map((item) => {
+            if (!item.name) {
+                size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
+                return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
+            }
+            if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
+                return `<audio controls src="${item.url}"></audio>` + (item.text ? `\n${item.text}` : "");
+            }
+            if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
+                return `<video controls src="${item.url}"></video>` + (item.text ? `\n${item.text}` : "");
+            }
+            return `[![${item.name}](${item.url})]()`;
+        }).join("\n");
+    }
     const markdown = window.markdownit({
         html: window.sanitizeHtml ? true : false,
-        breaks: true,
+        breaks: true
     });
-    markdown_render = (content) => {
-        if (!content) {
-            return "";
-        }
-        if (Array.isArray(content)) {
-            content = content.map((item) => {
-                if (!item.name) {
-                    size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
-                    return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
-                }
-                if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
-                    return `<audio controls src="${item.url}"></audio>` + (item.text ? `\n${item.text}` : "");
-                }
-                if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
-                    return `<video controls src="${item.url}"></video>` + (item.text ? `\n${item.text}` : "");
-                }
-                return `[![${item.name}](${item.url})]()`;
-            }).join("\n");
-        }
-        content = markdown.render(content)
-            .replaceAll("<a href=", '<a target="_blank" href=')
-            .replaceAll('<code>', '<code class="language-plaintext">')
-            .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
-            .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
-            .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
-            .replaceAll('src="/', `src="${window.backendUrl}/`)
-        if (window.sanitizeHtml) {
-            content = window.sanitizeHtml(content, {
-                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'audio', 'video']),
-                allowedAttributes: {
-                    a: [ 'href', 'title', 'target' ],
-                    i: [ 'class' ],
-                    code: [ 'class' ],
-                    img: [ 'src', 'alt', 'width', 'height' ],
-                    iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
-                    audio: [ 'src', 'controls' ],
-                    video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
-                },
-                allowedIframeHostnames: ['www.youtube.com']
-            });
-        }
-        return content;
+    content = markdown.render(content)
+        .replaceAll("<a href=", '<a target="_blank" href=')
+        .replaceAll('<code>', '<code class="language-plaintext">')
+        .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
+        .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
+        .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
+        .replaceAll('src="/', `src="${window.backendUrl}/`)
+    if (window.sanitizeHtml) {
+        content = window.sanitizeHtml(content, {
+            allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'audio', 'video']),
+            allowedAttributes: {
+                a: [ 'href', 'title', 'target' ],
+                i: [ 'class' ],
+                code: [ 'class' ],
+                img: [ 'src', 'alt', 'width', 'height' ],
+                iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
+                audio: [ 'src', 'controls' ],
+                video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
+            },
+            allowedIframeHostnames: ['www.youtube.com']
+        });
     }
+    return content;
 }
 
 function render_reasoning(reasoning, final = false) {
@@ -168,8 +167,9 @@ function filter_message(text) {
     if (Array.isArray(text) || !text) {
         return text;
     }
+    // Remove images from text
     return filter_message_content(text.replaceAll(
-        /<!-- generated images start -->[\s\S]+<!-- generated images end -->/gm, ""
+        /!\[.*?\]\(.*?\)/gm, ""
     ))
 }
 
@@ -1032,7 +1032,8 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
     } else if (message.type == "reasoning") {
         if (!reasoning_storage[message_id]) {
             reasoning_storage[message_id] = message;
-            if (message.is_thinking) {
+            reasoning_storage[message_id].text = "";
+            if (message.is_thinking && message_storage[message_id]) {
                 reasoning_storage[message_id].text = message_storage[message_id];
                 message_storage[message_id] = "";
             }
@@ -2965,12 +2966,13 @@ mediaSelect.querySelector(".close").onclick = () => {
     });
 });
 
-audioInput.addEventListener('click', async (event) => {
-    const i = audioInput.querySelector("i");
+audioButton.addEventListener('click', async (event) => {
+    const i = audioButton.querySelector("i");
     if (mediaRecorder) {
         i.classList.remove("fa-stop");
         i.classList.add("fa-microphone");
         mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
         mediaRecorder = null;
         return;
     }

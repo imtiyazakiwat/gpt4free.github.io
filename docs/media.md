@@ -28,7 +28,8 @@ async def main():
 asyncio.run(main())
 ```
 
-#### **Generate Audio with OpenAIFM:**
+<details>
+<summary>Generate Audio with OpenAIFM:</summary>
 
 OpenAIFM provides high-quality text-to-speech with various voice options and customizable voice styles.
 
@@ -49,8 +50,10 @@ response = client.media.generate(
 # Save the generated audio
 response.data[0].save("openai_fm_audio.mp3")
 ```
+</details>
 
-##### **Available Voices in OpenAIFM:**
+<details>
+<summary>Available Voices in OpenAIFM:</summary>
 
 OpenAIFM supports multiple voice options:
 - alloy
@@ -64,8 +67,10 @@ OpenAIFM supports multiple voice options:
 - sage
 - shimmer
 - verse
+</details>
 
-##### **Using Predefined Voice Styles in OpenAIFM:**
+<details>
+<summary>Using Predefined Voice Styles in OpenAIFM:</summary>
 
 OpenAIFM provides several predefined voice styles that can be accessed as class attributes. These styles define the personality, tone, and delivery characteristics of the generated speech:
 
@@ -104,8 +109,11 @@ Here's a description of each predefined style:
 4. **cowboy**: Warm, relaxed, and friendly tone with a steady cowboy drawl.
 5. **calm**: Composed, reassuring tone with quiet authority and confidence.
 6. **scientific_style**: Authoritative and precise academic tone for technical content.
+</details>
 
-##### **Creating Custom Voice Instructions:**
+
+<details>
+<summary>Creating Custom Voice Instructions in OpenAIFM:</summary>
 
 You can create your own voice style by defining custom instructions as a multi-line string. The instructions should describe the voice characteristics, tone, pacing, emotion, pronunciation, and pauses:
 
@@ -154,9 +162,10 @@ When creating custom instructions, consider including these elements:
 6. **Pauses**: Where and how long to pause between phrases.
 
 This structure helps the model understand exactly how to style the generated speech.
+</details>
 
 <details>
-<summary>JavaScript</summary>
+<summary>Full example for JavaScript</summary>
 
 ```javascript
 async function generateSpeech(text) {
@@ -195,7 +204,7 @@ generateSpeech('Hello, this is a speech synthesis test.');
 </details>
 
 <details>
-<summary>Examples with other providers</summary>
+<summary>Examples for all providers</summary>
 
 ```python
 from g4f.client import Client
@@ -305,6 +314,58 @@ try {
     console.error("Transcription error:", error);
     return null;
 }
+```
+</details>
+
+<details>
+<summary>JavaScript with MediaRecorder</summary>
+
+```javascript
+audioButton.addEventListener('click', async (event) => {
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        mediaRecorder = null;
+        return;
+    }
+
+    stream = await navigator.mediaDevices.getUserMedia({
+        audio: true
+    })
+
+    if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        console.warn('audio/webm is not supported');
+    }
+
+    mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm',
+    });
+
+    mediaRecorder.addEventListener('dataavailable', async event => {
+        const formData = new FormData();
+        formData.append('files', event.data);
+        const bucketId = crypto.randomUUID();
+        const language = document.getElementById("recognition-language")?.value;
+        const response = await fetch("/backend-api/v2/files/" + bucketId, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                "x-recognition-language": language,
+            }
+        });
+        const result = await response.json()
+        if (result.media) {
+            const media = [];
+            result.media.forEach((part)=> {
+                // Handle result
+                const url = `/files/${bucketId}/media/${part.name}`;
+                console.log(url);
+            });
+        }
+    });
+
+    mediaRecorder.start()
+})
 ```
 </details>
 
