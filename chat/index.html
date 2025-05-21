@@ -17,7 +17,8 @@
     <link rel="manifest" href="../dist/img/site.webmanifest">
     <script src="../dist/js/framework.js"></script>
     <script src="../dist/js/chat.v1.js" defer></script>
-    <script src="../dist/js/highlightjs-copy.min.js" defer></script>
+    <script src="../dist/js/highlight.min.js" async></script>
+    <script src="../dist/js/highlightjs-copy.min.js" async></script>
     <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
     <script src="../dist/js/sanitize-html.js" async></script>
     <link rel="stylesheet" href="../dist/css/dracula.min.css">
@@ -51,7 +52,6 @@
         <script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer/dist/cl100k_base.js" async></script>
         <script src="https://cdn.jsdelivr.net/npm/gpt-tokenizer/dist/o200k_base.js" async></script>
     </template>
-    <script src="../dist/js/highlight.min.js" async></script>
     <script type="module" src="../dist/js/photoswipe.js" async></script>
     <script async>
         if (localStorage.getItem("countTokens") != "false") {
@@ -374,6 +374,15 @@
                 </button>
                 <span>Logs</span>
             </div>
+        </div>
+        <div class="hljs-iframe-container hidden">
+            <div class="iframe-top-bar">
+                <button class="iframe-back-button">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <span>Preview</span>
+            </div>
+            <iframe class="hljs-iframe"></iframe>
         </div>
     </div>
 </body>

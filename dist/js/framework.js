@@ -2,15 +2,16 @@ window.oauthConfig = {
     clientId: '762e4f6f-2af6-437c-ad93-944cc17f9d23',
     scopes: ['inference-api']
 }
-window.checkUrls = [];
+
+const checkUrls = [];
 if (window.location.protocol === "file:") {
-    window.checkUrls.push("http://localhost:1337");
-    window.checkUrls.push("http://localhost:8080");
+    checkUrls.push("http://localhost:1337");
+    checkUrls.push("http://localhost:8080");
 }
 if (["https:", "http:"].includes(window.location.protocol)) {
-    window.checkUrls.push(window.location.origin);
+    checkUrls.push(window.location.origin);
 }
-window.checkUrls.push("https://g4f.hopto.org");
+checkUrls.push("https://g4f.hopto.org");
 async function checkUrl(url) {
     let response;
     try {
@@ -20,8 +21,8 @@ async function checkUrl(url) {
         return false;
     }
     if (response.ok) {
-        const connect_status = document.getElementById("connect_status");
-        connect_status ? connect_status.innerText = url : null;
+        const connectStatus = document.getElementById("connect_status");
+        connectStatus ? connectStatus.innerText = url : null;
         localStorage.setItem("backendUrl", url);
         window.backendUrl = url;
         return true;
@@ -30,7 +31,7 @@ async function checkUrl(url) {
 }
 window.backendUrl = localStorage.getItem('backendUrl') || "";
 window.connectToBackend = async () => {
-    for (const url of window.checkUrls) {
+    for (const url of checkUrls) {
         if(await checkUrl(url)) {
             return;
         }
@@ -104,4 +105,70 @@ window.translateAll = async () =>{
     }
     localStorage.setItem(window.translationKey, JSON.stringify(translations || allTranslations));
     return allTranslations;
+}
+
+const renderMarkdown = (content) => {
+    if (!content) {
+        return "";
+    }
+    if (!window.markdownit) {
+        return escapeHtml(content);
+    }
+    if (Array.isArray(content)) {
+        content = content.map((item) => {
+            if (!item.name) {
+                size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
+                return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
+            }
+            if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
+                return `<audio controls src="${item.url}"></audio>` + (item.text ? `\n${item.text}` : "");
+            }
+            if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
+                return `<video controls src="${item.url}"></video>` + (item.text ? `\n${item.text}` : "");
+            }
+            return `[![${item.name}](${item.url})]()`;
+        }).join("\n");
+    }
+    const markdown = window.markdownit({
+        html: window.sanitizeHtml ? true : false,
+        breaks: true
+    });
+    content = markdown.render(content)
+        .replaceAll("<a href=", '<a target="_blank" href=')
+        .replaceAll('<code>', '<code class="language-plaintext">')
+        .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
+        .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
+        .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
+        .replaceAll('src="/', `src="${window.backendUrl}/`)
+    if (window.sanitizeHtml) {
+        content = window.sanitizeHtml(content, {
+            allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'audio', 'video']),
+            allowedAttributes: {
+                a: [ 'href', 'title', 'target' ],
+                i: [ 'class' ],
+                code: [ 'class' ],
+                img: [ 'src', 'alt', 'width', 'height' ],
+                iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
+                audio: [ 'src', 'controls' ],
+                video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
+            },
+            allowedIframeHostnames: ['www.youtube.com']
+        });
+    }
+    return content;
+};
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+function filterMarkdown(text, allowedTypes = null, defaultValue = null) {
+    const match = text.match(/```(.+)\n(?<code>[\s\S]+?)(\n```|$)/);
+    if (match) {
+        const [, type, code] = match;
+        if (!allowedTypes || allowedTypes.includes(type)) {
+            return code;
+        }
+    }
+    return defaultValue;
 }

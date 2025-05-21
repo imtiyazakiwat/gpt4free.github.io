@@ -95,60 +95,9 @@ appStorage = window.localStorage || {
     length: 0
 }
 
-const markdown_render = (content) => {
-    if (!content) {
-        return "";
-    }
-    if (!window.markdownit) {
-        return escapeHtml(content);
-    }
-    if (Array.isArray(content)) {
-        content = content.map((item) => {
-            if (!item.name) {
-                size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
-                return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
-            }
-            if (item.name.endsWith(".wav") || item.name.endsWith(".mp3")) {
-                return `<audio controls src="${item.url}"></audio>` + (item.text ? `\n${item.text}` : "");
-            }
-            if (item.name.endsWith(".mp4") || item.name.endsWith(".webm")) {
-                return `<video controls src="${item.url}"></video>` + (item.text ? `\n${item.text}` : "");
-            }
-            return `[![${item.name}](${item.url})]()`;
-        }).join("\n");
-    }
-    const markdown = window.markdownit({
-        html: window.sanitizeHtml ? true : false,
-        breaks: true
-    });
-    content = markdown.render(content)
-        .replaceAll("<a href=", '<a target="_blank" href=')
-        .replaceAll('<code>', '<code class="language-plaintext">')
-        .replaceAll('<iframe src="', '<iframe frameborder="0" height="400" width="400" src="')
-        .replaceAll('<iframe type="text/html" src="', '<iframe type="text/html" frameborder="0" allow="fullscreen" height="224" width="400" src="')
-        .replaceAll('"></iframe>', `?enablejsapi=1"></iframe>`)
-        .replaceAll('src="/', `src="${window.backendUrl}/`)
-    if (window.sanitizeHtml) {
-        content = window.sanitizeHtml(content, {
-            allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'iframe', 'audio', 'video']),
-            allowedAttributes: {
-                a: [ 'href', 'title', 'target' ],
-                i: [ 'class' ],
-                code: [ 'class' ],
-                img: [ 'src', 'alt', 'width', 'height' ],
-                iframe: [ 'src', 'type', 'frameborder', 'allow', 'height', 'width' ],
-                audio: [ 'src', 'controls' ],
-                video: [ 'src', 'controls', 'loop', 'autoplay', 'muted' ],
-            },
-            allowedIframeHostnames: ['www.youtube.com']
-        });
-    }
-    return content;
-}
-
 function render_reasoning(reasoning, final = false) {
     const inner_text = reasoning.text ? `<div class="reasoning_text${final ? " final hidden" : ""}">
-        ${markdown_render(reasoning.text)}
+        ${renderMarkdown(reasoning.text)}
     </div>` : "";
     return `<div class="reasoning_body">
         <div class="reasoning_title">
@@ -199,23 +148,12 @@ function fallback_clipboard (text) {
     document.body.removeChild(textBox);
 }
 
-const iframe_container = Object.assign(document.createElement("div"), {
-    className: "hljs-iframe-container hidden",
-});
-const iframe = Object.assign(document.createElement("iframe"), {
-    className: "hljs-iframe",
-});
-iframe_container.appendChild(iframe);
-const iframe_close = Object.assign(document.createElement("button"), {
-    className: "hljs-iframe-close",
-    innerHTML: '<i class="fa-regular fa-x"></i>',
-});
-iframe_close.onclick = () => {
+const iframe_container = document.querySelector(".hljs-iframe-container");
+const iframe = document.querySelector(".hljs-iframe");
+document.querySelector(".iframe-back-button").onclick = () => {
     iframe_container.classList.add("hidden");
     iframe.src = "";
 }
-iframe_container.appendChild(iframe_close);
-document.body.appendChild(iframe_container);
 
 class HtmlRenderPlugin {
     constructor(options = {}) {
@@ -623,7 +561,7 @@ const handle_ask = async (do_ask_gpt = true, message = null) => {
         </div>
         <div class="content"> 
             <div class="content_inner">
-            ${markdown_render(message)}
+            ${renderMarkdown(message)}
             </div>
             <div class="count">
                 ${countTokensEnabled ? count_words_and_tokens(message, get_selected_model()?.value) : ""}
@@ -869,7 +807,8 @@ async function load_provider_parameters(provider) {
                 field_el.innerHTML = `<label for="${el_id}" title="">${key}:</label>`;
                 if (Number.isInteger(value)) {
                     max = value == 42 || value >= 4096 ? 8192 : value >= 100 ? 4096 : value == 1 ? 10 : 100;
-                    field_el.innerHTML += `<input type="range" id="${el_id}" name="${key}" value="${escapeHtml(value)}" class="slider" min="0" max="${max}" step="1"/><output>${escapeHtml(value)}</output>`;
+                    step = value >= 1024 ? 8 : 1;
+                    field_el.innerHTML += `<input type="range" id="${el_id}" name="${key}" value="${escapeHtml(value)}" class="slider" min="0" max="${max}" step="${step}"/><output>${escapeHtml(value)}</output>`;
                     field_el.innerHTML += `<i class="fa-solid fa-xmark"></i>`;
                 } else if (typeof value == "number") {
                     field_el.innerHTML += `<input type="range" id="${el_id}" name="${key}" value="${escapeHtml(value)}" class="slider" min="0" max="2" step="0.1"/><output>${escapeHtml(value)}</output>`;
@@ -952,7 +891,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         await save_conversation(conversation_id, get_conversation_data(conversation));
     } else if (message.type == "auth") {
         error_storage[message_id] = message.message
-        content_map.inner.innerHTML += markdown_render(`${window.translate('**An error occured:**')} ${message.message}`);
+        content_map.inner.innerHTML += renderMarkdown(`${window.translate('**An error occured:**')} ${message.message}`);
         let provider = provider_storage[message_id]?.name;
         let configEl = document.querySelector(`.settings .${provider}-api_key`);
         if (configEl) {
@@ -977,7 +916,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
         content_map.update_timeouts = [];
         error_storage[message_id] = message.message
         console.error(message.message);
-        content_map.inner.innerHTML += markdown_render(`${window.translate('**An error occured:**')} ${message.message}`);
+        content_map.inner.innerHTML += renderMarkdown(`${window.translate('**An error occured:**')} ${message.message}`);
         if (finish_message) {
             await finish_message();
         }
@@ -994,14 +933,14 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
                 img.onerror = () => img.src = backup;
             }
         } else {
-            content_map.inner.innerHTML = markdown_render(message.preview);
+            content_map.inner.innerHTML = renderMarkdown(message.preview);
             await register_message_images();
         }
     } else if (message.type == "content") {
         message_storage[message_id] += message.content;
         if (message.urls) {
             const div = document.createElement("div");
-            div.innerHTML = markdown_render(message.content);
+            div.innerHTML = renderMarkdown(message.content);
             const media = div.querySelector("img, video")
             if (scroll) {
                 media.onload = lazy_scroll_to_bottom;
@@ -1024,7 +963,7 @@ async function add_message_chunk(message, message_id, provider, scroll, finish_m
     } else if (message.type == "title") {
         title_storage[message_id] = message.title;
     } else if (message.type == "login") {
-        update_message(content_map, message_id, markdown_render(message.login), scroll);
+        update_message(content_map, message_id, renderMarkdown(message.login), scroll);
     } else if (message.type == "finish") {
         finish_storage[message_id] = message.finish;
     } else if (message.type == "usage") {
@@ -1177,7 +1116,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         content_map.update_timeouts.forEach((timeoutId)=>clearTimeout(timeoutId));
         content_map.update_timeouts = [];
         if (!error_storage[message_id] && message_storage[message_id]) {
-            html = markdown_render(message_storage[message_id]);
+            html = renderMarkdown(message_storage[message_id]);
             content_map.inner.innerHTML = html;
             highlight(content_map.inner);
         }
@@ -1809,7 +1748,7 @@ const load_conversation = async (conversation, scroll=true) => {
                     ${provider}
                     <div class="content_inner">
                         ${item.reasoning ? render_reasoning(item.reasoning, true): ""}
-                        ${markdown_render(buffer)}
+                        ${renderMarkdown(buffer)}
                     </div>
                     <div class="count">
                         ${countTokensEnabled ? count_words_and_tokens(
@@ -2078,12 +2017,6 @@ const add_message = async (
     }
     return conversation.items.length - 1;
 };
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-}
 
 const toLocaleDateString = (date) => {
     date = new Date(date);
@@ -2381,11 +2314,11 @@ function update_message(content_map, message_id, content = null, scroll = true) 
         // Existing function body
         if (!content) {
             if (reasoning_storage[message_id] && message_storage[message_id]) {
-                content = render_reasoning(reasoning_storage[message_id], true) + markdown_render(message_storage[message_id]);
+                content = render_reasoning(reasoning_storage[message_id], true) + renderMarkdown(message_storage[message_id]);
             } else if (reasoning_storage[message_id]) {
                 content = render_reasoning(reasoning_storage[message_id]);
             } else {
-                content = markdown_render(message_storage[message_id]);
+                content = renderMarkdown(message_storage[message_id]);
             }
             
             // Find last element for cursor placement
@@ -2403,7 +2336,7 @@ function update_message(content_map, message_id, content = null, scroll = true) 
         }
         
         if (error_storage[message_id]) {
-            content += markdown_render(`${window.translate('**An error occured:**')} ${error_storage[message_id]}`);
+            content += renderMarkdown(`${window.translate('**An error occured:**')} ${error_storage[message_id]}`);
         }
         
         // Use progressive rendering for large content
@@ -2613,10 +2546,8 @@ async function on_load() {
     } else {
         await load_conversations();
     }
-    if (window.hljs) {
-        hljs.addPlugin(new HtmlRenderPlugin())
-        hljs.addPlugin(new CopyButtonPlugin());
-    }
+    hljs.addPlugin(new HtmlRenderPlugin())
+    hljs.addPlugin(new CopyButtonPlugin());
     // Ensure sidebar is shown by default on desktop
     if (window.innerWidth >= 640) {
         sidebar.classList.add("shown");
@@ -2824,7 +2755,6 @@ async function on_api() {
             providerSelect.innerHTML += `
                 <option value="ARTA">ARTA Provider</option>
                 <option value="DeepSeekAPI">DeepSeek Provider</option>
-                <option value="Grok">Grok Provider</option>
                 <option value="Cloudflare">Cloudflare</option>
                 <option value="PerplexityLabs">Perplexity Labs</option>
                 <option value="HuggingFace">HuggingFace</option>
