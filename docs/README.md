@@ -71,7 +71,7 @@ Welcome to the GPT4Free (G4F) documentation hub! This guide provides everything 
 
 ### 📚 API Documentation
 
-- Check out the [official API docs](https://gpt4free.github.io/api-docs) for more details.
+- [FastAPI Documentation](https://gpt4free.github.io/api-docs)
 - [Backend API Documentation](backend_api_documentation.md)
 
 ---
