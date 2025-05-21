@@ -150,10 +150,15 @@ function fallback_clipboard (text) {
 
 const iframe_container = document.querySelector(".hljs-iframe-container");
 const iframe = document.querySelector(".hljs-iframe");
-document.querySelector(".iframe-back-button").onclick = () => {
+const iframe_close = Object.assign(document.createElement("button"), {
+    className: "hljs-iframe-close",
+    innerHTML: '<i class="fa-regular fa-x"></i>',
+});
+iframe_close.onclick = () => {
     iframe_container.classList.add("hidden");
     iframe.src = "";
 }
+iframe_container.appendChild(iframe_close);
 
 class HtmlRenderPlugin {
     constructor(options = {}) {
