@@ -88,16 +88,7 @@ window.translateAll = async () =>{
     const json_translations = "\n\n```json\n" + JSON.stringify(allTranslations, null, 4) + "\n```";
     const json_language = "`" + navigator.language + "`";
     const prompt = `Translate the following text snippets in a JSON object to ${json_language} (iso code): ${json_translations}`;
-    const live_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?json=true`;
-    const response = await fetch(live_url);
-    if (response.status !== 200) {
-        const fallback_url = `${window.backendUrl}/backend-api/v2/create?prompt=${encodeURI(prompt)}&filter_markdown=true&cache=true`;
-        const response = await fetch(fallback_url);
-        if (response.status !== 200) {
-            console.error("Error on translate: ", response.statusText);
-            return;
-        }
-    }
+    response = await query(prompt, true);
     let translations = await response.text();
     translations = JSON.parse(translations.split('\n---\n')[0]);
     if (translations[navigator.language]) {
@@ -106,7 +97,20 @@ window.translateAll = async () =>{
     localStorage.setItem(window.translationKey, JSON.stringify(translations || allTranslations));
     return allTranslations;
 }
-
+async function query(prompt, json) {
+    const liveUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}` + (json ? "?json=true" : "");
+    const response = await fetch(liveUrl);
+    if (response.status !== 200) {
+        let fallbackUrl = `${window.backendUrl}/backend-api/v2/create?prompt=${encodeURIComponent(prompt)}&cache=true`;
+        fallbackUrl += (json ? "&filter_markdown=true" : "");
+        const response = await fetch(fallbackUrl);
+        if (response.status !== 200) {
+            console.error("Error on query: ", response.statusText);
+            return;
+        }
+    }
+    return response;
+}
 const renderMarkdown = (content) => {
     if (!content) {
         return "";
@@ -171,4 +175,8 @@ function filterMarkdown(text, allowedTypes = null, defaultValue = null) {
         }
     }
     return defaultValue;
+}
+window.framework = {
+    query: query,
+    renderMarkdown: renderMarkdown
 }

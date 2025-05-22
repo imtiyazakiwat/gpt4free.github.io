@@ -1299,7 +1299,6 @@ ul {
 
 .hljs-iframe-button, .hljs-iframe-close {
     position: absolute;
-    top: 1rem;
     right: 1rem;
     padding: 7px;
     border-radius: .25rem;
@@ -1309,6 +1308,14 @@ ul {
     cursor: pointer;
     width: 32px;
     height: 32px;
+}
+
+.hljs-iframe-button {
+    bottom: 1rem;
+}
+
+.hljs-iframe-close {
+    top: 1rem;
 }
 
 .hljs-iframe-button:hover, .hljs-iframe-close:hover {
