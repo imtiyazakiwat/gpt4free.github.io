@@ -329,10 +329,12 @@ apt-get install ffmpeg flac
 ```
 Optional:
 ```
-pip install faster_whisper
+pip install faster_whisper soundfile
 ```
 Full example:
 ```javascript
+let mediaRecorder;
+
 audioButton.addEventListener('click', async (event) => {
     if (mediaRecorder) {
         mediaRecorder.stop();
