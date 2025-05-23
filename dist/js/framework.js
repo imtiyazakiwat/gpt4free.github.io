@@ -11,7 +11,7 @@ if (window.location.protocol === "file:") {
 if (["https:", "http:"].includes(window.location.protocol)) {
     checkUrls.push(window.location.origin);
 }
-checkUrls.push("https://g4f.hopto.org");
+//checkUrls.push("https://g4f.hopto.org");
 async function checkUrl(url) {
     let response;
     try {
