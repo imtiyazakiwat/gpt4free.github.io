@@ -29,7 +29,7 @@ async function checkUrl(url) {
     }
     return false;
 }
-window.backendUrl = localStorage.getItem('backendUrl') || "";
+window.backendUrl = ""; //localStorage.getItem('backendUrl') || "";
 window.connectToBackend = async () => {
     for (const url of checkUrls) {
         if(await checkUrl(url)) {
