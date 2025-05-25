@@ -97,7 +97,7 @@ window.translateAll = async () =>{
     localStorage.setItem(window.translationKey, JSON.stringify(translations || allTranslations));
     return allTranslations;
 }
-async function query(prompt, json) {
+async function query(prompt, json=false) {
     const liveUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}` + (json ? "?json=true" : "");
     const response = await fetch(liveUrl);
     if (response.status !== 200) {

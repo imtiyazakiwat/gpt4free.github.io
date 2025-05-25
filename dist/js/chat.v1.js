@@ -1283,19 +1283,21 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             if (prompt == "hello") {
                 seed = "";
             }
-            const text_url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}&seed=${seed}`;
-            await fetch(text_url)
+            const textUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}&seed=${seed}`;
+            await fetch(textUrl)
                 .then(async (response) => {
                     if (!response.ok) {
                         return;
                     }
-                    mime_type = response.headers.get("Content-Type");
-                    if (mime_type && mime_type.startsWith("text/")) {
+                    const mimeType = response.headers.get("Content-Type");
+                    if (mimeType && mimeType.startsWith("text/")) {
                         content = await response.text();
-                    } else if (mime_type && mime_type.startsWith("audio/")) {
-                        content = `<audio controls src="${text_url}"></audio>`
+                    } else if (mimeType && mimeType.startsWith("audio/")) {
+                        content = `<audio controls src="${textUrl}"></audio>`
+                    } else if (!response.ok) {
+                        content = `${window.translate('**An error occured:**')} ${await response.text()}`;
                     } else {
-                        content = `<iframe src="${text_url}"></iframe>`;
+                        content = `<iframe src="${textUrl}"></iframe>`;
                     }
                     await add_message(
                         window.conversation_id,
