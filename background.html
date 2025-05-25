@@ -177,14 +177,14 @@
                 }
             });
             setInterval(() => {
-                if (errorVideo < 3 || !refreshOnHide) {
+                if ((window.backendUrl && errorVideo < 3) || !refreshOnHide) {
                     return;
                 }
                 if (skipRefresh > 0) {
                     skipRefresh -= 1;
                     return;
                 }
-                if (errorImage < 3) {
+                if (window.backendUrl && errorImage < 3) {
                     imageFeed.src = window.backendUrl + "/search/image+g4f?skip=" + skipImage;
                     skipImage++;
                     return;
