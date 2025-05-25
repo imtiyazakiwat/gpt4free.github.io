@@ -121,6 +121,9 @@ const renderMarkdown = (content) => {
     if (Array.isArray(content)) {
         content = content.map((item) => {
             if (!item.name) {
+                if (item.text) {
+                    return item.text;
+                }
                 size = parseInt(appStorage.getItem(`bucket:${item.bucket_id}`), 10);
                 return `**Bucket:** [[${item.bucket_id}]](${item.url})${size ? ` (${formatFileSize(size)})` : ""}`
             }

@@ -586,7 +586,7 @@ const handle_ask = async (do_ask_gpt = true, message = null) => {
                 el.dataset.model
             ));
         } else {
-            await ask_gpt(message_id, -1, false, null, null, message);
+            await ask_gpt(message_id, -1, false, null, null, "next", message);
         }
     } else {
         await safe_load_conversation(window.conversation_id, true);
@@ -1239,7 +1239,20 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
             })
             return;
         }
-        puter.ai.chat(messages=messages, options={"model": model}, testMode=false)
+        const filtered_messages = messages.map(
+            (message) => {
+                return {
+                    role: message.role,
+                    content: Array.isArray(message.content) ? message.content.map((item) => {
+                        return {
+                            type: "text",
+                            text: item.text || ""
+                        }
+                    }) : message.content
+                }
+            }
+        );
+        puter.ai.chat(messages=filtered_messages, options={"model": model}, testMode=false)
             .then(async (response) => {
                 await add_message(
                     window.conversation_id,
@@ -1258,6 +1271,10 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                 stop_generating.classList.add("stop_generating-hidden");
                 load_conversations();
                 hide_sidebar();             
+            })
+            .catch((error) => {
+                stop_generating.classList.add("stop_generating-hidden");
+                console.error("Error on generate text:", error);
             });
         return;
     } else if (provider == "Live") {
