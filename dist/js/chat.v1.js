@@ -1252,7 +1252,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     null,
                     null,
                     null,
-                    {text: response.message.reasoning_content, status: ""}
+                    response.message.reasoning_content ? {text: response.message.reasoning_content, status: ""} : null
                 );
                 await load_conversation(await get_conversation(conversation_id));
                 stop_generating.classList.add("stop_generating-hidden");
@@ -2108,6 +2108,10 @@ async function hide_settings() {
 }
 
 sidebar_buttons.forEach((el) => el.addEventListener("click", async () => {
+    // Animate sidebar buttons
+    sidebar_buttons.forEach((el) => {
+        el.classList.toggle("rotated");
+    });
     // For desktop
     if (window.innerWidth >= 640) {
         // Toggle between shown and minimized only
@@ -2783,7 +2787,8 @@ async function on_api() {
         load_provider_models(appStorage.getItem("provider"));
     }).catch((e)=>{
         console.log(e)
-        providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>`;
+        providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>
+            <option value="Puter">Puter.js AI (live)</option>`;
         load_fallback_models();
         load_settings(provider_options);
     });
@@ -3321,14 +3326,18 @@ async function load_provider_models(provider=null) {
         }
         return;
     }
-    if (provider == "Puter" && !hasPuter) {
-        var tag = document.createElement('script');
-        tag.src = "https://js.puter.com/v2/";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        hasPuter = true;
+    if (provider == "Puter") {
+        if (!hasPuter) {
+            var tag = document.createElement('script');
+            tag.src = "https://js.puter.com/v2/";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            hasPuter = true;
+        }
+        const template = document.getElementById('modelPuter');
+        modelProvider.appendChild(template.content);
     }
-    const models = await api('models', provider);
+    const models = provider == "Puter" || await api('models', provider);
     if (models) {
         modelSelect.classList.add("hidden");
         if (!custom_model.value) {
@@ -3355,8 +3364,10 @@ async function load_provider_models(provider=null) {
                 }
             });
         }
-        add_options(modelProvider, models);
-        modelProvider.selectedIndex = defaultIndex;
+        if (Array.isArray(models)) {
+            add_options(modelProvider, models);
+            modelProvider.selectedIndex = defaultIndex;
+        }
         const optgroup = document.createElement('optgroup');
         optgroup.label = "Favorites:";
         const favorites = JSON.parse(appStorage.getItem("favorites") || "{}");
