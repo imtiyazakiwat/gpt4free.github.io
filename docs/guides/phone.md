@@ -12,7 +12,7 @@ Running Python applications on your smartphone is possible with specialized apps
 </p>
 
 1. **Install Pydroid from the Google Play Store:**
-   - Navigate to the Google Play Store and search for "Pydroid 3 - IDE for Python 3" or use the following link: [Pydroid 3 - IDE for Python 3](https://play.google.com/store/apps/details/Pydroid_3_IDE_for_Python_3).
+   - Navigate to the Google Play Store and search for "Pydroid 3 - IDE for Python 3" or use the following link: [Pydroid 3 - IDE for Python 3](https://play.google.com/store/apps/details?id=ru.iiec.pydroid3).
 
 2. **Install the Pydroid Repository Plugin:**
    - To enhance functionality, install the Pydroid repository plugin. Find it on the Google Play Store or use this link: [Pydroid Repository Plugin](https://play.google.com/store/apps/details?id=ru.iiec.pydroid3.quickinstallrepo).
