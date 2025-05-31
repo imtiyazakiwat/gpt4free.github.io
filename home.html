@@ -252,7 +252,7 @@
             form.addEventListener("submit", async (e) => {
                 e.preventDefault();
                 if(await check_access_token()) {
-                    e.currentTarget.submit();
+                    window.location.href = "/chat/";
                 }
             });
 

@@ -3288,6 +3288,9 @@ async function read_response(response, message_id, provider, scroll, finish_mess
 function get_api_key_by_provider(provider) {
     let api_key = null;
     if (provider) {
+        if (provider.startsWith("Puter") && localStorage.getItem('puter.auth.token')) {
+            return localStorage.getItem('puter.auth.token');
+        }
         api_key = document.querySelector(`.${provider}-api_key`)?.id || null;
         if (api_key == null) {
             api_key = document.getElementById(`${provider}-api_key`)?.id || null;
