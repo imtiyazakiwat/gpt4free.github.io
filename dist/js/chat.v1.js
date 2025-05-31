@@ -1209,13 +1209,13 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         regenerate_button.classList.remove("regenerate-hidden");
     }
     if (provider == "Puter") {
-        if (model == "dall-e-3") {
+        if (model == "dall-e-3" || model.includes("FLUX")) {
             if (!message) {
                 message = messages[messages.length-1].content;
             }
             puter.ai.txt2img(message, false).then(async (image)=>{
                 let dirName = puter.randName();
-                let fileName = puter.randName();
+                let fileName = sanitize(message, " ") + ".png";
                 await puter.fs.mkdir(dirName);
                 let site;
                 try {
@@ -1224,11 +1224,11 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                     site = await puter.hosting.get(dirName);
                 }
                 await puter.fs.write(`${dirName}/${fileName}`, await fetch(image.src).then((response) => response.blob()));
-                const url = `https://${site.subdomain}.puter.site/${fileName}`;
+                const url = `https://${site.subdomain}.puter.site/${encodeURIComponent(fileName)}`;
                 await add_message(
                     window.conversation_id,
                     "assistant",
-                    `[![${message.replaceAll('\n', ' ')}](${url})](${url})`,
+                    `[![${sanitize(message, ' ')}](${url})](${url})`,
                     null,
                     message_index,
                 );
@@ -1236,7 +1236,10 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
                 stop_generating.classList.add("stop_generating-hidden");
                 load_conversations();
                 hide_sidebar();
-            })
+            }).catch((error) => {
+                stop_generating.classList.add("stop_generating-hidden");
+                console.error("Error on generate image:", error);
+            });
             return;
         }
         const filtered_messages = messages.map(
@@ -3309,13 +3312,27 @@ function load_fallback_models() {
     fetch("https://text.pollinations.ai/models").then(async (response) => {
         models = await response.json();
         modelProvider.innerHTML = models.map((model)=>`<option value="${model.name}">${model.name + get_modelTags(model, false)}</option>`).join("");
-        ["flux", "turbo"].forEach((model) => {
+        const imageResponse = await fetch("https://image.pollinations.ai/models");
+        const imageModels = await imageResponse.json();
+        imageModels.forEach((model) => {
             let option = document.createElement("option");
             option.value = model;
             option.text = `${model} (${modelTags.image})`;
             modelProvider.appendChild(option);
         });
     });
+}
+
+async function load_puter_models() {
+    modelSelect.classList.add("hidden");
+    modelProvider.classList.remove("hidden");
+    modelProvider.name = `model[Puter]`;
+    const response = await fetch("https://api.puter.com/puterai/chat/models/");
+    const models = await response.json();
+    modelProvider.innerHTML = models.models.map((model)=>`<option value="${model}">${model + get_modelTags({
+        image: model.includes('FLUX'),
+        vision: ['gpt', 'o1', 'o3', 'o4'].includes(model.split('-')[0]) || model.includes('vision'),
+    })}</option>`).join("");
 }
 
 async function load_provider_models(provider=null) {
@@ -3356,10 +3373,10 @@ async function load_provider_models(provider=null) {
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             hasPuter = true;
         }
-        const template = document.getElementById('modelPuter');
-        modelProvider.appendChild(template.content);
+        await load_puter_models();
+        return;
     }
-    const models = provider == "Puter" || await api('models', provider);
+    const models = await api('models', provider);
     if (models) {
         modelSelect.classList.add("hidden");
         if (!custom_model.value) {
@@ -3429,10 +3446,12 @@ modelProvider.addEventListener("change", () => {
         option.text = modelProvider.querySelector(`option[value="${modelProvider.value}"]`).text;
         option.selected = true;
         const optgroup = modelProvider.querySelector('optgroup:last-child');
-        optgroup.appendChild(option);
-        if (optgroup.childElementCount > 5) {
-            delete selected[optgroup.firstChild.value];
-            optgroup.removeChild(optgroup.firstChild);
+        if (optgroup) {
+            optgroup.appendChild(option);
+            if (optgroup.childElementCount > 5) {
+                delete selected[optgroup.firstChild.value];
+                optgroup.removeChild(optgroup.firstChild);
+            }
         }
     }
     const selected_values = selected[modelProvider.value] ? selected[modelProvider.value] + 1 : 1;
