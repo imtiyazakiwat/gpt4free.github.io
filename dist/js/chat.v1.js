@@ -1323,11 +1323,11 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         }
         async function generate_image(prompt, model) {
             let seed = Math.floor(Date.now() / 1000);
-            seed = `model=${model}&seed=${seed}&`;
+            seed = `&seed=${seed}`;
             if (prompt == "hello") {
                 seed = "";
             }
-            const image = `https://image.pollinations.ai/prompt/${encodeURI(prompt)}?${seed}nologo=true`;
+            const image = `https://image.pollinations.ai/prompt/${encodeURI(prompt)}?model=${encodeURIComponent(model)}${seed}&nologo=true`;
             await fetch(image)
                 .then(async (response) => {
                     if (!response.ok) {
@@ -1353,7 +1353,7 @@ const ask_gpt = async (message_id, message_index = -1, regenerate = false, provi
         if (!message) {
             message = messages[messages.length-1].content;
         }
-        if (["flux", "turbo"].includes(model)) {
+        if (["flux", "turbo", "gptimage"].includes(model)) {
             return generate_image(message, model);
         }
         return generate_text(message, model);
@@ -2812,7 +2812,7 @@ async function on_api() {
         providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>
             <option value="Puter">Puter.js AI (live)</option>`;
         load_fallback_models();
-        load_settings(provider_options);
+        load_provider_models(appStorage.getItem("provider") || "Live");
     });
 
     const update_systemPrompt_icon = (checked) => {
@@ -3328,9 +3328,12 @@ async function load_puter_models() {
     modelProvider.classList.remove("hidden");
     modelProvider.name = `model[Puter]`;
     const response = await fetch("https://api.puter.com/puterai/chat/models/");
-    const models = await response.json();
-    modelProvider.innerHTML = models.models.map((model)=>`<option value="${model}">${model + get_modelTags({
-        image: model.includes('FLUX'),
+    let models = await response.json();
+    models = models.models;
+    models.push("dall-e-3");
+    models = models.filter((model) => !model.includes("FLUX"));
+    modelProvider.innerHTML = models.map((model)=>`<option value="${model}">${model + get_modelTags({
+        image: model.includes('FLUX') || model.includes('dall-e-3'),
         vision: ['gpt', 'o1', 'o3', 'o4'].includes(model.split('-')[0]) || model.includes('vision'),
     })}</option>`).join("");
 }
