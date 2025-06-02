@@ -119,18 +119,6 @@ client = Client(
 - **`web_search`** (Optional):  
   Boolean flag indicating whether to enable internet-based search capabilities. This is useful for obtaining real-time or specific details not included in the model’s training data.
 
-#### Providers Limitation
-The `web_search` argument is **limited to specific providers**, including:
-  - ChatGPT
-  - HuggingChat
-  - Blackbox
-  - RubiksAI
-
-If your chosen provider does not support `web_search`, it will not function as expected.  
-
-**Alternative Solution:**  
-Instead of relying on the `web_search` argument, you can use the more versatile **Search Tool Support**, which allows for highly customizable web search operations. The search tool enables you to define parameters such as query, number of results, word limit, and timeout, offering greater control over search capabilities.
-
 ---
 
 ## Usage Examples
@@ -149,8 +137,7 @@ response = client.chat.completions.create(
             "role": "user",
             "content": "Say this is a test"
         }
-    ],
-    web_search = False
+    ]
 )
 
 print(response.choices[0].message.content)
@@ -171,8 +158,7 @@ stream = client.chat.completions.create(
             "content": "Say this is a test"
         }
     ],
-    stream=True,
-    web_search = False
+    stream=True
 )
 
 for chunk in stream:
