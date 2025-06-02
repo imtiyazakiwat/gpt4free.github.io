@@ -278,7 +278,7 @@
                 document.getElementById("signout").onclick = async function() {
                     localStorage.removeItem("oauth");
                     localStorage.removeItem("HuggingFace-api_key");
-                    window.location.replace("/");
+                    window.location.replace("?");
                 }
             } else {
                 localStorage.removeItem("oauth");
