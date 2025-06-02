@@ -2811,7 +2811,6 @@ async function on_api() {
         console.log(e)
         providerSelect.innerHTML = `<option value="Live" checked>Pollinations AI (live)</option>
             <option value="Puter">Puter.js AI (live)</option>`;
-        load_fallback_models();
         load_provider_models(appStorage.getItem("provider") || "Live");
     });
 
