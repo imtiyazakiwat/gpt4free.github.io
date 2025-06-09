@@ -14,7 +14,7 @@ def chat_with_gpt():
             return jsonify({"error": "Message is required"}), 400
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1",
             messages=[{"role": "user", "content": message}],
             web_search=False
         )
