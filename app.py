@@ -4,6 +4,10 @@ from g4f.client import Client
 app = Flask(__name__)
 client = Client()
 
+@app.route('/')
+def health():
+    return "OK", 200
+
 @app.route('/chat', methods=['POST'])
 def chat_with_gpt():
     try:
